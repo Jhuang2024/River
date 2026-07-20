@@ -20,6 +20,16 @@ enum GameSpeed: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    /// Multiplier applied to all motion-system base durations.
+    var motionScale: Double {
+        switch self {
+        case .cinematic: return 1.45
+        case .standard: return 1.0
+        case .fast: return 0.5
+        case .instant: return 0.12
+        }
+    }
+
     /// Seconds a bot appears to "think" before acting.
     var botDelay: Double {
         switch self {
@@ -33,19 +43,19 @@ enum GameSpeed: String, Codable, CaseIterable, Identifiable {
     /// Pause when new board cards land.
     var dealPause: Double {
         switch self {
-        case .cinematic: return 0.9
-        case .standard: return 0.55
-        case .fast: return 0.25
-        case .instant: return 0.05
+        case .cinematic: return 0.8
+        case .standard: return 0.5
+        case .fast: return 0.22
+        case .instant: return 0.04
         }
     }
 
     /// Pause on showdown reveals and pot pushes.
     var showdownPause: Double {
         switch self {
-        case .cinematic: return 1.6
-        case .standard: return 1.1
-        case .fast: return 0.6
+        case .cinematic: return 1.5
+        case .standard: return 1.0
+        case .fast: return 0.55
         case .instant: return 0.15
         }
     }
@@ -76,25 +86,165 @@ enum AssistanceLevel: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+/// Card face rendering styles (§21).
+enum DeckStyle: String, Codable, CaseIterable, Identifiable {
+    case classic
+    case minimal
+    case highContrast
+    case fourColor
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .classic: return "Classic"
+        case .minimal: return "Minimal"
+        case .highContrast: return "High Contrast"
+        case .fourColor: return "Four Colour"
+        }
+    }
+}
+
+/// Player-selected accent colour (§4). One accent at a time.
+enum AccentChoice: String, Codable, CaseIterable, Identifiable {
+    case electricBlue
+    case deepRed
+    case emerald
+    case amber
+    case violet
+    case ice
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .electricBlue: return "Electric Blue"
+        case .deepRed: return "Deep Red"
+        case .emerald: return "Emerald"
+        case .amber: return "Amber"
+        case .violet: return "Violet"
+        case .ice: return "Ice"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .electricBlue: return Color(red: 0.25, green: 0.62, blue: 0.96)
+        case .deepRed: return Color(red: 0.85, green: 0.30, blue: 0.28)
+        case .emerald: return Color(red: 0.26, green: 0.72, blue: 0.50)
+        case .amber: return Color(red: 0.88, green: 0.70, blue: 0.36)
+        case .violet: return Color(red: 0.64, green: 0.50, blue: 0.90)
+        case .ice: return Color(red: 0.85, green: 0.90, blue: 0.95)
+        }
+    }
+}
+
+/// Hand-completion pacing (§25).
+enum AutoDealSetting: String, Codable, CaseIterable, Identifiable {
+    case manual
+    case oneSecond
+    case twoSeconds
+    case threeSeconds
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .manual: return "Manual"
+        case .oneSecond: return "Auto · 1s"
+        case .twoSeconds: return "Auto · 2s"
+        case .threeSeconds: return "Auto · 3s"
+        }
+    }
+
+    /// nil = wait for the player to tap Next hand.
+    var delay: Double? {
+        switch self {
+        case .manual: return nil
+        case .oneSecond: return 1
+        case .twoSeconds: return 2
+        case .threeSeconds: return 3
+        }
+    }
+}
+
+/// Optional decision timer (§24). Expiry checks when free, otherwise folds.
+enum DecisionTimerSetting: String, Codable, CaseIterable, Identifiable {
+    case off
+    case sixty
+    case thirty
+    case fifteen
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .off: return "Off"
+        case .sixty: return "60s"
+        case .thirty: return "30s"
+        case .fifteen: return "15s"
+        }
+    }
+
+    var seconds: Double? {
+        switch self {
+        case .off: return nil
+        case .sixty: return 60
+        case .thirty: return 30
+        case .fifteen: return 15
+        }
+    }
+}
+
+/// Hero stack display mode (§8) — cycled by tapping the stack.
+enum StackDisplayMode: String, Codable, CaseIterable {
+    case chips
+    case bigBlinds
+    case both
+
+    var next: StackDisplayMode {
+        switch self {
+        case .chips: return .bigBlinds
+        case .bigBlinds: return .both
+        case .both: return .chips
+        }
+    }
+}
+
 /// All local preferences. Stored as versioned JSON on device; nothing leaves
-/// the phone.
+/// the phone. Decoding is field-by-field resilient so adding settings never
+/// wipes existing ones.
 struct AppSettings: Codable, Equatable {
     var speed: GameSpeed = .standard
     var soundEnabled: Bool = true
     var hapticsEnabled: Bool = true
-    var fourColorDeck: Bool = false
+    var deckStyle: DeckStyle = .classic
+    var accent: AccentChoice = .amber
     var assistanceLevel: AssistanceLevel = .hints
-    /// Individual assistance toggles (the presets set sensible defaults, but
-    /// each can be flipped independently).
+    // Individual assistance toggles (presets set sensible defaults, each can
+    // be flipped independently afterwards).
     var showHandStrength: Bool = true
     var showPotOdds: Bool = true
+    var showRequiredEquity: Bool = false
+    var showBoardTexture: Bool = false
     var allowRecommendations: Bool = true
     var revealFoldedBotCards: Bool = false
+    // Safety and pacing.
     var confirmAllIn: Bool = true
+    var protectStrongHands: Bool = true
+    var swipeDownToFold: Bool = false
+    var autoDeal: AutoDealSetting = .manual
+    var decisionTimer: DecisionTimerSetting = .off
+    // Layout and display.
+    var leftHandedMode: Bool = false
+    var stackDisplay: StackDisplayMode = .chips
     var showSeedAfterHand: Bool = false
-    /// Session setup memory.
+    // Session setup memory.
     var preferredHandsTarget: Int = 20
     var preferredDifficulty: BotDifficulty = .beginner
+    var hasCompletedOnboarding: Bool = false
+
+    init() {}
 
     mutating func applyAssistancePreset(_ level: AssistanceLevel) {
         assistanceLevel = level
@@ -102,16 +252,69 @@ struct AppSettings: Codable, Equatable {
         case .guided:
             showHandStrength = true
             showPotOdds = true
+            showRequiredEquity = true
+            showBoardTexture = true
             allowRecommendations = true
+            protectStrongHands = true
         case .hints:
             showHandStrength = true
             showPotOdds = false
+            showRequiredEquity = false
+            showBoardTexture = false
             allowRecommendations = true
         case .pure:
             showHandStrength = false
             showPotOdds = false
+            showRequiredEquity = false
+            showBoardTexture = false
             allowRecommendations = false
         }
+    }
+
+    // MARK: - Resilient Codable
+
+    private enum CodingKeys: String, CodingKey {
+        case speed, soundEnabled, hapticsEnabled, deckStyle, accent, assistanceLevel
+        case showHandStrength, showPotOdds, showRequiredEquity, showBoardTexture
+        case allowRecommendations, revealFoldedBotCards
+        case confirmAllIn, protectStrongHands, swipeDownToFold, autoDeal, decisionTimer
+        case leftHandedMode, stackDisplay, showSeedAfterHand
+        case preferredHandsTarget, preferredDifficulty, hasCompletedOnboarding
+    }
+
+    /// Reads one field, keeping the default when the key is absent or invalid.
+    private static func field<T: Decodable>(_ container: KeyedDecodingContainer<CodingKeys>, _ key: CodingKeys, _ fallback: T) -> T {
+        if let wrapped = try? container.decodeIfPresent(T.self, forKey: key), let value = wrapped {
+            return value
+        }
+        return fallback
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        speed = AppSettings.field(c, .speed, .standard)
+        soundEnabled = AppSettings.field(c, .soundEnabled, true)
+        hapticsEnabled = AppSettings.field(c, .hapticsEnabled, true)
+        deckStyle = AppSettings.field(c, .deckStyle, .classic)
+        accent = AppSettings.field(c, .accent, .amber)
+        assistanceLevel = AppSettings.field(c, .assistanceLevel, .hints)
+        showHandStrength = AppSettings.field(c, .showHandStrength, true)
+        showPotOdds = AppSettings.field(c, .showPotOdds, true)
+        showRequiredEquity = AppSettings.field(c, .showRequiredEquity, false)
+        showBoardTexture = AppSettings.field(c, .showBoardTexture, false)
+        allowRecommendations = AppSettings.field(c, .allowRecommendations, true)
+        revealFoldedBotCards = AppSettings.field(c, .revealFoldedBotCards, false)
+        confirmAllIn = AppSettings.field(c, .confirmAllIn, true)
+        protectStrongHands = AppSettings.field(c, .protectStrongHands, true)
+        swipeDownToFold = AppSettings.field(c, .swipeDownToFold, false)
+        autoDeal = AppSettings.field(c, .autoDeal, .manual)
+        decisionTimer = AppSettings.field(c, .decisionTimer, .off)
+        leftHandedMode = AppSettings.field(c, .leftHandedMode, false)
+        stackDisplay = AppSettings.field(c, .stackDisplay, .chips)
+        showSeedAfterHand = AppSettings.field(c, .showSeedAfterHand, false)
+        preferredHandsTarget = AppSettings.field(c, .preferredHandsTarget, 20)
+        preferredDifficulty = AppSettings.field(c, .preferredDifficulty, .beginner)
+        hasCompletedOnboarding = AppSettings.field(c, .hasCompletedOnboarding, false)
     }
 }
 
@@ -131,5 +334,9 @@ final class SettingsStore: ObservableObject {
     init(store: PersistenceStore) {
         self.store = store
         self.settings = store.load(AppSettings.self, from: PersistenceStore.FileName.settings) ?? AppSettings()
+    }
+
+    var accent: Color {
+        return settings.accent.color
     }
 }

@@ -23,11 +23,39 @@ no ads, no accounts, no network.
 - Deterministic seeded shuffling — inspect any hand's deck seed after the fact
 - Synthesized sound, haptics, four-color deck option, speed controls
 
+## Interface
+
+The UI follows the RIVER design specification: a token-driven dark visual
+system (near-black backgrounds, graphite surfaces, muted felt, one
+player-selected accent colour), monospaced digits for every number that
+changes, and a portrait table built in three regions — thin status bar, the
+six-max table, and a thumb-reach hero region.
+
+- Tab shell: **Play**, **Review**, **Profile** (Train and Progress arrive with
+  their feature phases). The live table is a full-screen destination outside
+  the tabs.
+- Contextual action bar (Fold separated; labels carry amounts), bet-sizing
+  sheet with adaptive presets (BB multiples preflop, pot fractions postflop),
+  integer-snapping slider and exact entry.
+- Central animation sequencing: staged board reveals, chip sweeps into the
+  pot, ordered showdown reveals, winner banners; speed presets multiply the
+  shared motion durations; Reduce Motion is respected.
+- Layered assistance: Glance (hand, draws, price), Hint (reasoned
+  recommendation with honest confidence), plus action history, opponent
+  reads from observed stats only, and tap-to-inspect pot breakdowns.
+- Safety: Protect Strong Hands fold confirmation, all-in confirmations,
+  optional swipe-to-fold, optional decision timers, left-handed layout.
+- First launch asks three questions (experience, help level, first goal) and
+  configures the starting experience — no accounts, no tour.
+- Four deck styles including a colourblind-friendly four-colour deck; six
+  accent colours; VoiceOver labels on cards and seats.
+
 ## Project layout
 
 ```
 River.xcodeproj/        Xcode 16 project (file-system-synchronized groups)
 River/                  SwiftUI app target (UI, view model, audio, haptics)
+RiverUITests/           XCUITest suite (launch with -uitest for determinism)
 Packages/RiverKit/      Pure-Swift engine package (no UI dependencies)
   Sources/RiverKit/
     Models/             Cards, deck, deterministic RNG

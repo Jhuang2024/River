@@ -21,16 +21,12 @@ struct SessionResultsView: View {
                     }
                     recentHands
                     VStack(spacing: 10) {
-                        Button {
+                        ActionButton(title: "Run it again", role: .primary, accent: settingsStore.accent, identifier: "results.again") {
                             playAgain()
-                        } label: {
-                            Text("Run it again").riverButton()
                         }
-                        Button {
+                        ActionButton(title: "Back to menu", role: .secondary, accent: settingsStore.accent, identifier: "results.menu") {
                             game.endSessionAndClear()
                             path = NavigationPath()
-                        } label: {
-                            Text("Back to menu").riverButton(prominent: false)
                         }
                     }
                 }
@@ -156,10 +152,10 @@ struct SessionResultsView: View {
     private func playAgain() {
         guard let previous = game.session else { return }
         var config = previous.config
-        config.seed = UInt64.random(in: UInt64.min...UInt64.max)
-        game.startNewSession(config: config)
+        config.seed = UITestSupport.seedOverride ?? UInt64.random(in: UInt64.min...UInt64.max)
+        // Pop back to the table (root of the cover's stack) and start fresh.
         path = NavigationPath()
-        path.append(Route.table)
+        game.startNewSession(config: config)
     }
 }
 

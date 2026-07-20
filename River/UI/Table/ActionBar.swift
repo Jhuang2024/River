@@ -1,72 +1,94 @@
 import SwiftUI
 import RiverKit
 
-/// The hero's primary action row: Fold | Check/Call | Bet/Raise.
-/// Fold sits apart on the left so it cannot be fat-fingered.
+/// Contextual action row (§11): only currently-legal actions, amounts in the
+/// labels, Fold spatially separated (§12), left-handed mirroring (§43).
 struct ActionBar: View {
     let actions: AvailableActions
-    let heroStack: Int
-    let confirmAllIn: Bool
-    let onAction: (PlayerAction) -> Void
-    let onOpenBetPanel: () -> Void
-
-    @State private var confirmingAllInCall = false
+    var accent: Color
+    var leftHanded: Bool
+    /// Fold requests route through the caller so Protect Strong Hands can
+    /// intercept them; the bar itself never applies actions.
+    let onFold: () -> Void
+    let onCheck: () -> Void
+    let onCall: () -> Void
+    let onOpenBetSheet: () -> Void
 
     var body: some View {
-        HStack(spacing: 10) {
-            Button {
-                onAction(.fold)
-            } label: {
-                Text("Fold")
-                    .font(.system(.headline, design: .rounded))
-                    .foregroundStyle(Theme.danger)
-                    .padding(.vertical, 14)
-                    .frame(width: 86)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(Theme.backgroundElevated)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .strokeBorder(Theme.danger.opacity(0.4))
-                            )
-                    )
-            }
-
-            Spacer(minLength: 14)
-
-            if actions.canCheck {
-                Button {
-                    onAction(.check)
-                } label: {
-                    Text("Check").riverButton(prominent: false)
-                }
-            } else if actions.canCall {
-                Button {
-                    if confirmAllIn && actions.callCost >= heroStack {
-                        confirmingAllInCall = true
-                    } else {
-                        onAction(.call)
-                    }
-                } label: {
-                    Text(actions.callCost >= heroStack ? "Call \(actions.callCost) (all-in)" : "Call \(actions.callCost)")
-                        .riverButton(prominent: false)
-                }
-            }
-
-            if actions.betRaise != nil {
-                Button {
-                    onOpenBetPanel()
-                } label: {
-                    Text(actions.betRaise?.kind == .bet ? "Bet" : "Raise")
-                        .riverButton()
-                }
+        HStack(spacing: Theme.Spacing.s) {
+            if leftHanded {
+                aggressive
+                passive
+                Spacer(minLength: Theme.Spacing.l)
+                foldButton.frame(width: 84)
+            } else {
+                foldButton.frame(width: 84)
+                Spacer(minLength: Theme.Spacing.l)
+                passive
+                aggressive
             }
         }
-        .confirmationDialog("Call all-in for \(actions.callCost)?", isPresented: $confirmingAllInCall, titleVisibility: .visible) {
-            Button("Call all-in", role: .destructive) {
-                onAction(.call)
-            }
-            Button("Cancel", role: .cancel) {}
+    }
+
+    @ViewBuilder
+    private var foldButton: some View {
+        ActionButton(title: "Fold", role: .destructive, accent: accent, identifier: "action.fold", action: onFold)
+    }
+
+    @ViewBuilder
+    private var passive: some View {
+        if actions.canCheck {
+            ActionButton(title: "Check", role: .secondary, accent: accent, identifier: "action.check", action: onCheck)
+        } else if actions.canCall {
+            ActionButton(
+                title: "Call \(actions.callCost)",
+                subtitle: actions.isCallAllIn ? "All-in" : nil,
+                role: .secondary,
+                accent: accent,
+                identifier: "action.call",
+                action: onCall
+            )
         }
+    }
+
+    @ViewBuilder
+    private var aggressive: some View {
+        if let options = actions.betRaise {
+            ActionButton(
+                title: options.kind == .bet ? "Bet" : "Raise",
+                role: .primary,
+                accent: accent,
+                identifier: "action.betraise",
+                action: onOpenBetSheet
+            )
+        }
+    }
+}
+
+/// Optional decision timer (§24): thin progress bar over the action area.
+struct DecisionTimerView: View {
+    /// Remaining fraction, 1...0.
+    let fraction: Double
+    var accent: Color
+
+    private var color: Color {
+        if fraction < 0.2 { return Theme.danger }
+        if fraction < 0.45 { return Theme.caution }
+        return accent
+    }
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(Color.white.opacity(0.08))
+                Capsule()
+                    .fill(color)
+                    .frame(width: max(0, proxy.size.width * fraction))
+            }
+        }
+        .frame(height: 3)
+        .animation(.linear(duration: 0.2), value: fraction)
+        .accessibilityHidden(true)
     }
 }

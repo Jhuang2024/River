@@ -10,6 +10,21 @@
 		AA0000012E00000000000001 /* RiverKit in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000022E00000000000002 /* RiverKit */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		AA0000192E00000000000019 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA00000C2E0000000000000C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000082E00000000000008;
+			remoteInfo = River;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		AA0000072E00000000000007 /* River.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = River.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA00001D2E0000000000001D /* RiverUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RiverUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AA0000032E00000000000003 /* River */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -18,6 +33,15 @@
 			explicitFolders = (
 			);
 			path = River;
+			sourceTree = "<group>";
+		};
+		AA0000132E00000000000013 /* RiverUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = RiverUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -31,6 +55,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA0000162E00000000000016 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -38,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000032E00000000000003 /* River */,
+				AA0000132E00000000000013 /* RiverUITests */,
 				AA0000062E00000000000006 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -46,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000072E00000000000007 /* River.app */,
+				AA00001D2E0000000000001D /* RiverUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -76,7 +109,36 @@
 			productReference = AA0000072E00000000000007 /* River.app */;
 			productType = "com.apple.product-type.application";
 		};
+		AA0000142E00000000000014 /* RiverUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA00001A2E0000000000001A /* Build configuration list for PBXNativeTarget "RiverUITests" */;
+			buildPhases = (
+				AA0000152E00000000000015 /* Sources */,
+				AA0000162E00000000000016 /* Frameworks */,
+				AA0000172E00000000000017 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AA0000182E00000000000018 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AA0000132E00000000000013 /* RiverUITests */,
+			);
+			name = RiverUITests;
+			productName = RiverUITests;
+			productReference = AA00001D2E0000000000001D /* RiverUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXTargetDependency section */
+		AA0000182E00000000000018 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0000082E00000000000008 /* River */;
+			targetProxy = AA0000192E00000000000019 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		AA00000C2E0000000000000C /* Project object */ = {
@@ -88,6 +150,10 @@
 				TargetAttributes = {
 					AA0000082E00000000000008 = {
 						CreatedOnToolsVersion = 16.0;
+					};
+					AA0000142E00000000000014 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = AA0000082E00000000000008;
 					};
 				};
 			};
@@ -109,6 +175,7 @@
 			projectRoot = "";
 			targets = (
 				AA0000082E00000000000008 /* River */,
+				AA0000142E00000000000014 /* RiverUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -121,10 +188,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA0000172E00000000000017 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		AA0000092E00000000000009 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0000152E00000000000015 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -311,6 +392,40 @@
 			};
 			name = Release;
 		};
+		AA00001B2E0000000000001B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.river.poker.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = River;
+			};
+			name = Debug;
+		};
+		AA00001C2E0000000000001C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.river.poker.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = River;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -328,6 +443,15 @@
 			buildConfigurations = (
 				AA00000F2E0000000000000F /* Debug */,
 				AA0000102E00000000000010 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA00001A2E0000000000001A /* Build configuration list for PBXNativeTarget "RiverUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA00001B2E0000000000001B /* Debug */,
+				AA00001C2E0000000000001C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

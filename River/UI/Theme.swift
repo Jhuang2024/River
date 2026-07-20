@@ -1,70 +1,159 @@
 import SwiftUI
 import RiverKit
 
-/// RIVER's visual language: deep charcoal, near-black felt, restrained metallic
-/// accents. No casino gold overload, no jackpot flash.
+/// RIVER design tokens (§4): near-black backgrounds, graphite surfaces, deep
+/// muted table green, cool grey type, restrained metallic details. One
+/// player-selected accent at a time; semantic colours keep fixed meanings.
 enum Theme {
-    static let background = Color(red: 0.07, green: 0.08, blue: 0.09)
-    static let backgroundElevated = Color(red: 0.11, green: 0.12, blue: 0.14)
-    static let feltDark = Color(red: 0.05, green: 0.13, blue: 0.10)
-    static let feltLight = Color(red: 0.09, green: 0.21, blue: 0.16)
-    static let rail = Color(red: 0.16, green: 0.13, blue: 0.10)
-    static let accent = Color(red: 0.79, green: 0.67, blue: 0.44)      // muted brass
-    static let accentSoft = Color(red: 0.79, green: 0.67, blue: 0.44).opacity(0.6)
-    static let textPrimary = Color(white: 0.94)
-    static let textSecondary = Color(white: 0.62)
+
+    // MARK: - Base palette
+
+    static let background = Color(red: 0.055, green: 0.06, blue: 0.07)
+    static let backgroundElevated = Color(red: 0.10, green: 0.11, blue: 0.125)
+    static let surface = Color(red: 0.13, green: 0.14, blue: 0.155)
+    static let feltDark = Color(red: 0.045, green: 0.115, blue: 0.09)
+    static let feltLight = Color(red: 0.08, green: 0.19, blue: 0.145)
+    static let rail = Color(red: 0.14, green: 0.12, blue: 0.10)
+    static let textPrimary = Color(white: 0.93)
+    static let textSecondary = Color(white: 0.60)
+    static let textTertiary = Color(white: 0.42)
+    static let metallic = Color(red: 0.68, green: 0.70, blue: 0.73)
+    static let separator = Color.white.opacity(0.08)
+
+    // MARK: - Semantic colours (§4): fixed meanings, never decorative.
+
+    /// Favourable / correct.
+    static let positive = Color(red: 0.30, green: 0.66, blue: 0.44)
+    /// Warning / marginal.
+    static let caution = Color(red: 0.85, green: 0.66, blue: 0.30)
+    /// Dangerous / major mistake / destructive action.
+    static let danger = Color(red: 0.80, green: 0.30, blue: 0.27)
+    /// Informational.
+    static let info = Color(red: 0.35, green: 0.58, blue: 0.85)
+    /// Neutral / inactive.
+    static let neutral = Color(white: 0.45)
+
+    // MARK: - Cards & chips
+
     static let cardFace = Color(white: 0.96)
-    static let cardBack = Color(red: 0.16, green: 0.24, blue: 0.32)
-    static let chipCommitted = Color(red: 0.22, green: 0.45, blue: 0.62)
-    static let danger = Color(red: 0.78, green: 0.29, blue: 0.26)
-    static let positive = Color(red: 0.32, green: 0.62, blue: 0.42)
-    static let actingRing = Color(red: 0.85, green: 0.75, blue: 0.5)
+    static let cardFaceMinimal = Color(white: 0.92)
+    static let cardBack = Color(red: 0.15, green: 0.22, blue: 0.30)
+    static let chipCommitted = Color(red: 0.24, green: 0.46, blue: 0.62)
+
+    // MARK: - Gradients
 
     static let tableGradient = RadialGradient(
         colors: [feltLight, feltDark],
         center: .center,
         startRadius: 30,
-        endRadius: 320
+        endRadius: 340
     )
 
     static let backgroundGradient = LinearGradient(
-        colors: [Color(red: 0.09, green: 0.10, blue: 0.12), Color(red: 0.05, green: 0.06, blue: 0.07)],
+        colors: [Color(red: 0.085, green: 0.09, blue: 0.105), Color(red: 0.045, green: 0.05, blue: 0.06)],
         startPoint: .top,
         endPoint: .bottom
     )
 
-    /// Suit color, honoring the colorblind-friendly four-color deck option.
-    static func suitColor(_ suit: Suit, fourColor: Bool) -> Color {
-        if fourColor {
+    // MARK: - Spacing scale
+
+    enum Spacing {
+        static let xxs: CGFloat = 2
+        static let xs: CGFloat = 4
+        static let s: CGFloat = 8
+        static let m: CGFloat = 12
+        static let l: CGFloat = 16
+        static let xl: CGFloat = 24
+        static let xxl: CGFloat = 32
+    }
+
+    // MARK: - Corner radii
+
+    enum Radius {
+        static let chip: CGFloat = 8
+        static let control: CGFloat = 13
+        static let card: CGFloat = 14
+        static let sheet: CGFloat = 22
+    }
+
+    // MARK: - Motion base durations (§39), multiplied by GameSpeed.motionScale
+    // at animation sites where pacing is speed-dependent.
+
+    enum Motion {
+        static let micro: Double = 0.14
+        static let button: Double = 0.18
+        static let cardDeal: Double = 0.24
+        static let chip: Double = 0.26
+        static let sheet: Double = 0.32
+        static let major: Double = 0.5
+    }
+
+    // MARK: - Typography roles (§5). Numbers use monospaced digits.
+
+    enum Fonts {
+        static let display = Font.system(size: 44, weight: .black, design: .rounded)
+        static let screenTitle = Font.system(size: 22, weight: .bold, design: .rounded)
+        static let sectionTitle = Font.system(size: 11, weight: .bold, design: .rounded)
+        static let playerName = Font.system(size: 11, weight: .semibold, design: .rounded)
+        static let stackValue = Font.system(size: 12, weight: .bold, design: .rounded)
+        static let potValue = Font.system(size: 15, weight: .bold, design: .rounded)
+        static let primaryAction = Font.system(size: 17, weight: .semibold, design: .rounded)
+        static let secondaryAction = Font.system(size: 14, weight: .semibold, design: .rounded)
+        static let body = Font.system(size: 15, design: .rounded)
+        static let caption = Font.system(size: 11, design: .rounded)
+        static let telemetry = Font.system(size: 11, weight: .medium, design: .monospaced)
+    }
+
+    // MARK: - Suit colours (§21)
+
+    static func suitColor(_ suit: Suit, style: DeckStyle) -> Color {
+        switch style {
+        case .fourColor:
             switch suit {
-            case .spades: return Color(white: 0.15)
-            case .hearts: return Color(red: 0.75, green: 0.20, blue: 0.20)
-            case .diamonds: return Color(red: 0.16, green: 0.38, blue: 0.72)
-            case .clubs: return Color(red: 0.18, green: 0.52, blue: 0.34)
+            case .clubs: return Color(red: 0.18, green: 0.52, blue: 0.32)
+            case .diamonds: return Color(red: 0.17, green: 0.40, blue: 0.75)
+            case .hearts: return Color(red: 0.76, green: 0.20, blue: 0.20)
+            case .spades: return Color(white: 0.13)
             }
-        }
-        switch suit {
-        case .spades, .clubs: return Color(white: 0.15)
-        case .hearts, .diamonds: return Color(red: 0.75, green: 0.20, blue: 0.20)
+        case .highContrast:
+            switch suit {
+            case .spades, .clubs: return Color.black
+            case .hearts, .diamonds: return Color(red: 0.82, green: 0.10, blue: 0.10)
+            }
+        default:
+            switch suit {
+            case .spades, .clubs: return Color(white: 0.15)
+            case .hearts, .diamonds: return Color(red: 0.74, green: 0.21, blue: 0.21)
+            }
         }
     }
 }
 
+// MARK: - Shared control styling
+
 extension View {
-    /// Standard prominent action button style.
-    func riverButton(prominent: Bool = true) -> some View {
+    /// Standard prominent action button fill.
+    func riverButton(prominent: Bool = true, accent: Color) -> some View {
         self
-            .font(.system(.headline, design: .rounded))
+            .font(Theme.Fonts.primaryAction)
             .foregroundStyle(prominent ? Color.black : Theme.textPrimary)
             .padding(.vertical, 14)
             .frame(maxWidth: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(prominent ? Theme.accent : Theme.backgroundElevated)
+                RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
+                    .fill(prominent ? accent : Theme.backgroundElevated)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
                     .strokeBorder(Color.white.opacity(prominent ? 0 : 0.08))
             )
+    }
+
+    /// Section header style ("SESSION STATS").
+    func sectionHeader() -> some View {
+        self
+            .font(Theme.Fonts.sectionTitle)
+            .kerning(1.2)
+            .foregroundStyle(Theme.textSecondary)
     }
 }

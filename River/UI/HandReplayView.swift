@@ -51,7 +51,7 @@ struct HandReplayView: View {
         let snap = snapshot
         return VStack(spacing: 10) {
             // Board and pot.
-            BoardView(board: snap.board, fourColor: settingsStore.settings.fourColorDeck, cardWidth: 40)
+            CommunityBoardView(board: snap.board, visibleCount: snap.board.count, deckStyle: settingsStore.settings.deckStyle, cardWidth: 40)
             Text("Pot \(snap.pot)")
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundStyle(Theme.textPrimary)
@@ -60,7 +60,7 @@ struct HandReplayView: View {
             // Caption of the current step.
             Text(snap.caption)
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundStyle(Theme.accent)
+                .foregroundStyle(settingsStore.accent)
                 .multilineTextAlignment(.center)
                 .frame(minHeight: 34)
 
@@ -86,7 +86,7 @@ struct HandReplayView: View {
         HStack(spacing: 8) {
             Text(name(index))
                 .font(.system(size: 13, weight: index == history.heroSeat ? .bold : .semibold, design: .rounded))
-                .foregroundStyle(index == history.heroSeat ? Theme.accent : Theme.textPrimary)
+                .foregroundStyle(index == history.heroSeat ? settingsStore.accent : Theme.textPrimary)
                 .frame(width: 74, alignment: .leading)
                 .lineLimit(1)
             if index == history.buttonIndex {
@@ -97,11 +97,11 @@ struct HandReplayView: View {
                     .background(Circle().fill(Color.white))
             }
             if let cards = seat.holeCards, cards.count == 2 {
-                CardView(card: cards[0], width: 22, fourColor: settingsStore.settings.fourColorDeck)
-                CardView(card: cards[1], width: 22, fourColor: settingsStore.settings.fourColorDeck)
+                PlayingCardView(card: cards[0], width: 22, style: settingsStore.settings.deckStyle)
+                PlayingCardView(card: cards[1], width: 22, style: settingsStore.settings.deckStyle)
             } else if !seat.hasFolded {
-                CardView(card: nil, width: 22)
-                CardView(card: nil, width: 22)
+                PlayingCardView(card: nil, width: 22, style: settingsStore.settings.deckStyle)
+                PlayingCardView(card: nil, width: 22, style: settingsStore.settings.deckStyle)
             }
             Spacer()
             if seat.committedThisStreet > 0 {
@@ -129,7 +129,7 @@ struct HandReplayView: View {
         .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 9)
-                .fill(highlight ? Theme.accent.opacity(0.16) : Color.black.opacity(0.25))
+                .fill(highlight ? settingsStore.accent.opacity(0.16) : Color.black.opacity(0.25))
         )
         .opacity(seat.hasFolded ? 0.55 : 1)
     }
@@ -163,7 +163,7 @@ struct HandReplayView: View {
                 ),
                 in: 0...Double(max(1, history.events.count))
             )
-            .tint(Theme.accent)
+            .tint(settingsStore.accent)
             if settingsStore.settings.showSeedAfterHand {
                 Text("Deck seed \(history.seed)")
                     .font(.system(size: 10, design: .monospaced))
@@ -211,7 +211,7 @@ struct HandReplayView: View {
             HStack {
                 Text(decision.street.name)
                     .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundStyle(Theme.accent)
+                    .foregroundStyle(settingsStore.accent)
                 Spacer()
                 Text(actionLabel(decision.chosen))
                     .font(.system(size: 13, weight: .bold, design: .rounded))

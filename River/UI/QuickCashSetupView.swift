@@ -47,7 +47,7 @@ struct QuickCashSetupView: View {
                                 HStack(spacing: 10) {
                                     Image(systemName: bot.symbolName)
                                         .font(.system(size: 14))
-                                        .foregroundStyle(Theme.accent)
+                                        .foregroundStyle(settingsStore.accent)
                                         .frame(width: 26)
                                     VStack(alignment: .leading, spacing: 1) {
                                         Text("\(bot.name) · \(bot.archetype.displayName)")
@@ -82,7 +82,7 @@ struct QuickCashSetupView: View {
                                     }
                                     Spacer()
                                     Image(systemName: settingsStore.settings.assistanceLevel == level ? "checkmark.circle.fill" : "circle")
-                                        .foregroundStyle(settingsStore.settings.assistanceLevel == level ? Theme.accent : Theme.textSecondary)
+                                        .foregroundStyle(settingsStore.settings.assistanceLevel == level ? settingsStore.accent : Theme.textSecondary)
                                 }
                                 .padding(12)
                                 .background(RoundedRectangle(cornerRadius: 12).fill(Theme.backgroundElevated))
@@ -95,10 +95,8 @@ struct QuickCashSetupView: View {
                         .foregroundStyle(Theme.textSecondary)
                         .frame(maxWidth: .infinity)
 
-                    Button {
+                    ActionButton(title: "Deal me in", role: .primary, accent: settingsStore.accent, identifier: "setup.start") {
                         startSession()
-                    } label: {
-                        Text("Deal me in").riverButton()
                     }
                 }
                 .padding(20)
@@ -117,19 +115,17 @@ struct QuickCashSetupView: View {
         settingsStore.settings.preferredDifficulty = difficulty
         let config = SessionConfig(
             handsTarget: handsTarget,
-            seed: UInt64.random(in: UInt64.min...UInt64.max),
+            seed: UITestSupport.seedOverride ?? UInt64.random(in: UInt64.min...UInt64.max),
             bots: BotProfile.defaultLineup(difficulty: difficulty)
         )
+        path = NavigationPath()
+        // The table presents itself as a full-screen cover once the session starts.
         game.startNewSession(config: config)
-        path.append(Route.table)
     }
 
     private func section(_ title: String, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title.uppercased())
-                .font(.system(size: 11, weight: .bold, design: .rounded))
-                .kerning(1.2)
-                .foregroundStyle(Theme.textSecondary)
+            Text(title.uppercased()).sectionHeader()
             content()
         }
     }
@@ -144,7 +140,7 @@ struct QuickCashSetupView: View {
                 .frame(maxWidth: .infinity)
                 .background(
                     RoundedRectangle(cornerRadius: 11)
-                        .fill(selected ? Theme.accent : Theme.backgroundElevated)
+                        .fill(selected ? settingsStore.accent : Theme.backgroundElevated)
                 )
         }
     }
