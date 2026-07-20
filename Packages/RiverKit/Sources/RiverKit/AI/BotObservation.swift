@@ -31,6 +31,16 @@ public struct BotObservation: Equatable, Sendable {
     public let available: AvailableActions
     /// Hand events visible to this seat (own hole cards, all public actions).
     public let visibleEvents: [HandEvent]
+    /// Observed public tendencies per seat, from previous completed hands
+    /// (§29). Populated by the session layer; empty when unavailable.
+    public var observedTendencies: [Int: SeatTendencies] = [:]
+
+    /// Copy with tendencies attached (observations are otherwise immutable).
+    public func with(tendencies: [Int: SeatTendencies]) -> BotObservation {
+        var copy = self
+        copy.observedTendencies = tendencies
+        return copy
+    }
 
     /// Opponents still contesting the pot.
     public var activeOpponentCount: Int {

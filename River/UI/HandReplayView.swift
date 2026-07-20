@@ -185,8 +185,18 @@ struct HandReplayView: View {
 
     // MARK: - Decision analysis
 
-    private var heroDecisions: [DecisionRecord] {
-        return history.decisions.filter { $0.seat == history.heroSeat }
+    /// Hero decisions paired with their index in the full decision list, so
+    /// stored analyses (keyed by decisionIndex) line up.
+    private var heroDecisions: [(index: Int, record: DecisionRecord)] {
+        var result: [(Int, DecisionRecord)] = []
+        for (index, record) in history.decisions.enumerated() where record.seat == history.heroSeat {
+            result.append((index, record))
+        }
+        return result
+    }
+
+    private func analysis(forDecisionIndex index: Int) -> DecisionAnalysis? {
+        return history.analyses.first { $0.decisionIndex == index }
     }
 
     private var decisionsPanel: some View {
@@ -200,13 +210,22 @@ struct HandReplayView: View {
                     .font(.system(size: 12, design: .rounded))
                     .foregroundStyle(Theme.textSecondary)
             }
-            ForEach(Array(heroDecisions.enumerated()), id: \.offset) { _, decision in
-                decisionCard(decision)
+            ForEach(heroDecisions, id: \.index) { entry in
+                decisionCard(entry.record, analysis: analysis(forDecisionIndex: entry.index))
             }
         }
     }
 
-    private func decisionCard(_ decision: DecisionRecord) -> some View {
+    private func gradeColor(_ grade: DecisionGrade) -> Color {
+        switch grade {
+        case .blunder, .significantMistake: return Theme.danger
+        case .inaccuracy: return Theme.caution
+        case .reasonable, .mixed: return Theme.textSecondary
+        case .strong, .excellent: return Theme.positive
+        }
+    }
+
+    private func decisionCard(_ decision: DecisionRecord, analysis: DecisionAnalysis?) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text(decision.street.name)
@@ -217,6 +236,28 @@ struct HandReplayView: View {
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(Theme.textPrimary)
             }
+            // Understated grade indicator (§27 of the UI spec): label plus a
+            // thin colour accent, never a celebration.
+            if let analysis {
+                HStack(spacing: 6) {
+                    Rectangle()
+                        .fill(gradeColor(analysis.grade))
+                        .frame(width: 3, height: 14)
+                    Text(analysis.grade.displayName)
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(gradeColor(analysis.grade))
+                    if analysis.evLossBB > 0.15 {
+                        Text("−\(String(format: "%.1f", analysis.evLossBB)) BB est.")
+                            .font(.system(size: 11, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                    Spacer()
+                    Text("Confidence: \(analysis.confidence.displayName)")
+                        .font(.system(size: 10, design: .rounded))
+                        .foregroundStyle(Theme.textTertiary)
+                }
+            }
             Text(decision.handDescription)
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundStyle(Theme.textPrimary.opacity(0.85))
@@ -226,11 +267,18 @@ struct HandReplayView: View {
                     detail("To call", "\(decision.toCall)")
                     detail("Needed", "\(Int((decision.potOdds * 100).rounded()))%")
                 }
-                if let strength = decision.annotation?.strengthEstimate {
+                if let equity = analysis?.equity {
+                    detail("Est. equity", "\(Int((equity * 100).rounded()))%")
+                } else if let strength = decision.annotation?.strengthEstimate {
                     detail("Est. equity", "\(Int((strength * 100).rounded()))%")
                 }
             }
-            if decision.toCall > 0 {
+            if let analysis {
+                Text(analysis.explanation)
+                    .font(.system(size: 11, design: .rounded))
+                    .foregroundStyle(Theme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if decision.toCall > 0 {
                 Text("You were asked to pay \(decision.toCall) into a final pot of \(decision.potBefore + decision.toCall), so you needed about \(Int((decision.potOdds * 100).rounded()))% equity to break even.")
                     .font(.system(size: 11, design: .rounded))
                     .foregroundStyle(Theme.textSecondary)

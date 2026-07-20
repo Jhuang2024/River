@@ -50,6 +50,43 @@ six-max table, and a thumb-reach hero region.
 - Four deck styles including a colourblind-friendly four-colour deck; six
   accent colours; VoiceOver labels on cards and seats.
 
+## AI and analysis
+
+The bots and the coaching layer share one strategy stack, built for training
+rather than theatre:
+
+- **Strict information boundaries.** Every decision reads a `BotObservation`
+  that structurally cannot contain another player's cards or the deck;
+  mandatory fairness tests prove that changing the hero's hidden cards or the
+  future deck order cannot change a bot's decision, and that identical
+  observations and seeds decide identically.
+- **Exact combination ranges.** 1,326-combo weighted ranges with canonical
+  labels, dead-card removal, floors, normalization and deterministic
+  sampling; a 169-hand ordering computed offline from real all-in equity.
+- **Configured preflop strategy.** Versioned `StrategyConfig` with
+  position-based open/call/3-bet/4-bet/defend/squeeze/shove ranges,
+  contextual sizing, push/fold bands at short stacks, and bounded archetype
+  and difficulty modifiers (Beginner → Elite; six archetypes including
+  Maniac, Solid Regular and Trapper).
+- **Range-based postflop reasoning.** Opponent range tracking with
+  posterior-times-likelihood updates and probability floors; made-hand
+  classes, exact relative strength, extended draw detection and numeric
+  board features feed candidate-action generation with street-specific
+  sizing families and an inspectable score breakdown per candidate.
+- **Range-aware equity.** Exact river enumeration versus one range, seeded
+  Monte Carlo elsewhere, async with cancellation, plus tested pot-odds math.
+- **Result-independent grading.** Every hero decision is re-analyzed after
+  the hand by deterministic re-simulation: candidate EVs (noise-free),
+  honest confidence levels, Blunder→Excellent/Mixed grades that never judge
+  by outcome, deterministic template explanations with concept tags, all
+  stored versioned in the hand history (schema v2; v1 saves still load).
+- **Bounded adaptation.** Advanced/Elite bots read only observed public
+  tendencies (VPIP, PFR, fold-to-c-bet with sample counts) and adjust within
+  limits — never instantly, never from hidden information.
+
+None of this claims to be a solved game: Elite is strong approximate
+strategy, explicitly beatable, with no hidden-information shortcuts.
+
 ## Project layout
 
 ```

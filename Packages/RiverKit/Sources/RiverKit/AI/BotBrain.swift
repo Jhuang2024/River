@@ -1,233 +1,109 @@
 import Foundation
 
-/// Layered bot decision logic: personality profile → preflop hand quality /
-/// postflop equity estimate → candidate action choice with seeded mixing.
+/// Layered bot decision pipeline (§1): profile → configured preflop ranges /
+/// postflop range-based candidate scoring → seeded controlled mixing.
 ///
 /// The brain only ever reads a `BotObservation`, which structurally cannot
 /// contain hidden information. Given the same observation, profile and RNG
-/// stream, decisions are fully deterministic.
+/// stream, decisions are fully deterministic (§43).
 public enum BotBrain {
 
+    /// Backwards-compatible entry point.
     public static func decide(observation obs: BotObservation, profile: BotProfile, rng: inout SeededRNG) -> (action: PlayerAction, annotation: DecisionAnnotation) {
+        let full = decideWithTrace(observation: obs, profile: profile, rng: &rng)
+        return (full.action, full.annotation)
+    }
+
+    public struct FullDecision: Sendable {
+        public let action: PlayerAction
+        public let annotation: DecisionAnnotation
+        /// Postflop decisions carry a full inspectable trace (§40).
+        public let trace: DecisionTrace?
+    }
+
+    public static func decideWithTrace(observation obs: BotObservation, profile: BotProfile, rng: inout SeededRNG) -> FullDecision {
+        var config = StrategyConfig.baseline.applying(profile: profile)
+        applyAdaptation(&config, obs: obs, profile: profile)
+
         if obs.street == .preflop {
-            return decidePreflop(obs: obs, profile: profile, rng: &rng)
+            let context = PreflopContext.build(from: obs)
+            let decision = PreflopStrategy.decide(obs: obs, context: context, config: config, rng: &rng)
+            let combo = HoleCombo(obs.holeCards[0], obs.holeCards[1])
+            let annotation = DecisionAnnotation(
+                strengthEstimate: 1 - HandOrdering.percentile(of: combo),
+                advisorKind: nil,
+                note: decision.note
+            )
+            return FullDecision(action: decision.action, annotation: annotation, trace: nil)
         }
-        return decidePostflop(obs: obs, profile: profile, rng: &rng)
-    }
 
-    // MARK: - Shared helpers
-
-    /// 1.0 on the button, approaching 0 in the earliest seat.
-    private static func positionFactor(_ obs: BotObservation) -> Double {
-        let n = obs.opponents.count + 1
-        guard n > 1 else { return 1 }
-        let total = max(obs.opponents.map { $0.seatIndex }.max() ?? 0, obs.seat, obs.buttonIndex) + 1
-        let distance = ((obs.buttonIndex - obs.seat) % total + total) % total
-        return 1 - Double(distance) / Double(total - 1)
-    }
-
-    /// Builds a legal bet/raise action, clamping the target into range.
-    private static func betRaiseAction(target: Int, options: BetRaiseOptions) -> PlayerAction {
-        var amount = max(options.minTo, min(target, options.maxTo))
-        if !options.isLegal(toAmount: amount) {
-            amount = options.minTo
-        }
-        return PlayerAction(kind: options.kind, toAmount: amount)
-    }
-
-    private static func chance(_ probability: Double, _ rng: inout SeededRNG) -> Bool {
-        return rng.double01() < max(0, min(1, probability))
-    }
-
-    // MARK: - Preflop
-
-    private static func decidePreflop(obs: BotObservation, profile: BotProfile, rng: inout SeededRNG) -> (action: PlayerAction, annotation: DecisionAnnotation) {
-        let chen = PreflopHands.chenScore(for: obs.holeCards)
-        let label = PreflopHands.label(for: obs.holeCards)
-        let pos = positionFactor(obs)
-        let bb = obs.bigBlind
-        let toCall = obs.available.callCost
-        let unraised = obs.currentBet <= bb
-
+        let equitySeed = rng.nextUInt64()
+        let context = PostflopContext.build(
+            obs: obs,
+            config: config,
+            iterations: profile.difficulty.equityIterations,
+            seed: equitySeed
+        )
+        let outcome = PostflopDecision.choose(context: context, profile: profile, config: config, rng: &rng, seed: equitySeed)
         let annotation = DecisionAnnotation(
-            strengthEstimate: PreflopHands.strengthPercentile(for: obs.holeCards),
+            strengthEstimate: context.equity.share,
             advisorKind: nil,
-            note: "\(label), Chen \(String(format: "%.1f", chen))"
+            note: "\(context.madeHand.handClass.name), eq \(Int((context.equity.share * 100).rounded()))% vs \(context.obs.activeOpponentCount)"
         )
-
-        // Base opening threshold, tightened in early position (scaled by how
-        // position-aware this personality is) and shifted by looseness.
-        let positionTerm = (1 - pos) * 3.0 * profile.positionAwareness
-        var openThreshold = 6.0 + positionTerm
-        openThreshold -= (profile.looseness - 0.25) * 8.0
-
-        if unraised {
-            if obs.available.canCheck {
-                // Big blind option after limps.
-                if chen >= openThreshold + 1 && chance(profile.aggression, &rng), let options = obs.available.betRaise {
-                    let limpers = obs.opponents.filter { !$0.hasFolded && $0.committedThisStreet >= bb }.count
-                    let target = sized(bbMultiple: 3.0 + Double(limpers), bb: bb, profile: profile, rng: &rng)
-                    return (betRaiseAction(target: target, options: options), annotation)
-                }
-                return (.check, annotation)
-            }
-            // Facing just the blinds.
-            if chen >= openThreshold {
-                if let options = obs.available.betRaise, chance(0.35 + profile.aggression * 0.6, &rng) {
-                    let limpers = obs.opponents.filter { !$0.hasFolded && $0.committedThisStreet >= bb }.count
-                    let target = sized(bbMultiple: 3.0 + Double(limpers), bb: bb, profile: profile, rng: &rng)
-                    return (betRaiseAction(target: target, options: options), annotation)
-                }
-                return (.call, annotation)
-            }
-            // Loose players limp along with speculative hands.
-            let limpThreshold = openThreshold - 3.5
-            if chen >= limpThreshold && chance(profile.looseness, &rng) {
-                return (.call, annotation)
-            }
-            return (.fold, annotation)
-        }
-
-        // Facing a raise.
-        let potOdds = toCall > 0 ? Double(toCall) / Double(obs.pot + toCall) : 0
-        let bigDecision = toCall >= obs.myStack / 2
-
-        var threeBetThreshold = 13.0 - profile.aggression * 2.5
-        var callThreshold = 8.5 - profile.looseness * 4.0 - pos * profile.positionAwareness
-        callThreshold -= profile.callStickiness * 2.0
-        if bigDecision {
-            // Calling for half the stack or more needs a premium hand.
-            callThreshold = max(callThreshold, 11.5 - profile.callStickiness * 2.0)
-            threeBetThreshold = max(threeBetThreshold, 12.0)
-        }
-
-        if chen >= threeBetThreshold, let options = obs.available.betRaise, chance(0.4 + profile.aggression * 0.5, &rng) {
-            let target = min(obs.currentBet * 3, options.maxTo)
-            return (betRaiseAction(target: target, options: options), annotation)
-        }
-        // Occasional light three-bet bluff from aggressive profiles.
-        if !bigDecision, chen >= 7, let options = obs.available.betRaise, chance(profile.bluffFrequency * 0.25, &rng) {
-            let target = min(obs.currentBet * 3, options.maxTo)
-            return (betRaiseAction(target: target, options: options), annotation)
-        }
-        if chen >= callThreshold && obs.available.canCall {
-            return (.call, annotation)
-        }
-        // Sticky players peel with a decent price.
-        if obs.available.canCall && potOdds < 0.25 && chance(profile.callStickiness * 0.5, &rng) {
-            return (.call, annotation)
-        }
-        if obs.available.canCheck {
-            return (.check, annotation)
-        }
-        return (.fold, annotation)
+        return FullDecision(action: outcome.action, annotation: annotation, trace: outcome.trace)
     }
 
-    private static func sized(bbMultiple: Double, bb: Int, profile: BotProfile, rng: inout SeededRNG) -> Int {
-        let jitter = 1.0 + (rng.double01() - 0.5) * profile.sizingJitter
-        return max(bb * 2, Int((bbMultiple * Double(bb) * jitter).rounded()))
-    }
+    /// Bounded exploitative adjustments for Advanced/Elite bots with enough
+    /// evidence (§30). Never instantaneous, never unbounded.
+    private static func applyAdaptation(_ config: inout StrategyConfig, obs: BotObservation, profile: BotProfile) {
+        guard profile.difficulty == .advanced || profile.difficulty == .elite else { return }
+        let live = obs.opponents.filter { !$0.hasFolded }.map { $0.seatIndex }
+        let observed = live.compactMap { obs.observedTendencies[$0] }.filter { $0.sufficientForAdaptation }
+        guard !observed.isEmpty else { return }
 
-    // MARK: - Postflop
-
-    private static func decidePostflop(obs: BotObservation, profile: BotProfile, rng: inout SeededRNG) -> (action: PlayerAction, annotation: DecisionAnnotation) {
-        let iterations = profile.difficulty == .beginner ? 90 : 170
-        let estimate = EquityEstimator.equityVsRandom(
-            hole: obs.holeCards,
-            board: obs.board,
-            opponents: max(1, obs.activeOpponentCount),
-            iterations: iterations,
-            rng: &rng
-        )
-        let equity = estimate.equity
-        let draws = EquityEstimator.detectDraws(hole: obs.holeCards, board: obs.board)
-        let toCall = obs.available.callCost
-        let potOdds = toCall > 0 ? Double(toCall) / Double(obs.pot + toCall) : 0
-
-        let annotation = DecisionAnnotation(
-            strengthEstimate: equity,
-            advisorKind: nil,
-            note: "equity ≈ \(Int((equity * 100).rounded()))% vs \(obs.activeOpponentCount) (\(estimate.samples) samples)"
-        )
-
-        // Beginner bots misjudge: blur their equity estimate.
-        var perceived = equity
-        if profile.difficulty == .beginner {
-            perceived += (rng.double01() - 0.5) * 0.12
-            perceived = max(0, min(1, perceived))
-        }
-
-        let opponentsIn = max(1, obs.activeOpponentCount)
-        // Threshold for betting for value scales with number of opponents.
-        let valueThreshold = 0.48 + 0.05 * Double(opponentsIn - 1) + (0.5 - profile.aggression) * 0.08
-        let strongThreshold = 0.70 - profile.aggression * 0.06
-
-        if obs.available.canCheck {
-            if let options = obs.available.betRaise {
-                // Value bet.
-                if perceived >= valueThreshold && chance(0.35 + profile.aggression * 0.55, &rng) {
-                    let fraction = perceived >= strongThreshold ? 0.75 : 0.55
-                    return (betRaiseAction(target: potFractionTarget(fraction, obs: obs, profile: profile, rng: &rng), options: options), annotation)
-                }
-                // Semi-bluff with a real draw.
-                if obs.street != .river && draws.estimatedOuts >= 4 && chance(profile.bluffFrequency + profile.aggression * 0.25, &rng) {
-                    return (betRaiseAction(target: potFractionTarget(0.6, obs: obs, profile: profile, rng: &rng), options: options), annotation)
-                }
-                // Occasional stab at the pot.
-                if chance(profile.bluffFrequency * 0.4, &rng) {
-                    return (betRaiseAction(target: potFractionTarget(0.5, obs: obs, profile: profile, rng: &rng), options: options), annotation)
-                }
-            }
-            return (.check, annotation)
-        }
-
-        // Facing a bet.
-        let stickiness = profile.callStickiness * 0.12
-        let raiseThreshold = strongThreshold + 0.05
-
-        if perceived >= raiseThreshold, let options = obs.available.betRaise, chance(profile.aggression * 0.8, &rng) {
-            let target = max(options.minTo, Int(Double(obs.currentBet) * 2.6))
-            return (betRaiseAction(target: target, options: options), annotation)
-        }
-        // Semi-bluff raise.
-        if obs.street != .river && draws.estimatedOuts >= 8, let options = obs.available.betRaise, chance(profile.bluffFrequency * 0.35, &rng) {
-            return (betRaiseAction(target: options.minTo, options: options), annotation)
-        }
-        if obs.available.canCall {
-            // Core pot-odds call, softened by stickiness and draw potential.
-            let drawBonus = obs.street != .river ? Double(draws.estimatedOuts) * 0.004 : 0
-            if perceived + stickiness + drawBonus >= potOdds {
-                return (.call, annotation)
-            }
-            // All-in calls get extra scrutiny even from sticky players.
-            if obs.available.isCallAllIn || toCall >= obs.myStack {
-                if perceived >= potOdds * 0.9 && chance(profile.callStickiness * 0.4, &rng) {
-                    return (.call, annotation)
-                }
-                return (.fold, annotation)
-            }
-            if chance(profile.callStickiness * 0.35, &rng) {
-                return (.call, annotation)
+        let averageVPIP = observed.map { $0.vpipPercent }.reduce(0, +) / Double(observed.count)
+        let cbetSamples = observed.filter { $0.cbetOpportunities >= 12 }
+        if !cbetSamples.isEmpty {
+            let averageFoldToCBet = cbetSamples.map { $0.foldToCBetPercent }.reduce(0, +) / Double(cbetSamples.count)
+            // Opponents who fold to continuation bets get barrelled more;
+            // opponents who never fold get bluffed less and valued thinner.
+            if averageFoldToCBet > 55 {
+                config.cbetFrequency = min(0.95, config.cbetFrequency * 1.2)
+                config.bluffScale = min(2.2, config.bluffScale * 1.15)
+            } else if averageFoldToCBet < 30 {
+                config.bluffScale = max(0.25, config.bluffScale * 0.8)
+                config.valueThresholdShift = max(-0.08, config.valueThresholdShift - 0.03)
             }
         }
-        return (.fold, annotation)
-    }
-
-    /// Target "to" amount for a pot-fraction bet with personality jitter.
-    private static func potFractionTarget(_ fraction: Double, obs: BotObservation, profile: BotProfile, rng: inout SeededRNG) -> Int {
-        let jitter = 1.0 + (rng.double01() - 0.5) * profile.sizingJitter * 0.6
-        let raw = Double(obs.pot) * fraction * jitter
-        return obs.myCommittedThisStreet + max(obs.bigBlind, Int(raw.rounded()))
+        // Wide openers get three-bet more (§30).
+        if averageVPIP > 38 {
+            for key in config.threeBetPercent.keys {
+                config.threeBetPercent[key] = min(0.25, config.threeBetPercent[key]! * 1.25)
+            }
+        }
     }
 }
 
-/// Convenience used by the session runner and tests: derive the per-decision
-/// RNG stream from the hand seed so every decision is reproducible.
+/// Session-facing entry point: derives the per-decision RNG stream from the
+/// hand seed so every decision is reproducible (§43).
 public enum BotDecider {
+
     public static func decide(hand: PokerHand, seat: Int, profile: BotProfile) -> (action: PlayerAction, annotation: DecisionAnnotation)? {
-        guard let obs = hand.observation(for: seat) else { return nil }
+        guard let full = decideWithTrace(hand: hand, seat: seat, profile: profile, tendencies: [:]) else { return nil }
+        return (full.action, full.annotation)
+    }
+
+    /// Full decision with trace and optional observed tendencies.
+    public static func decideWithTrace(
+        hand: PokerHand,
+        seat: Int,
+        profile: BotProfile,
+        tendencies: [Int: SeatTendencies]
+    ) -> BotBrain.FullDecision? {
+        guard let baseObs = hand.observation(for: seat) else { return nil }
+        let obs = tendencies.isEmpty ? baseObs : baseObs.with(tendencies: tendencies)
         let stream = UInt64(hand.decisions.count) &* 64 &+ UInt64(seat) &+ 7
         var rng = SeededRNG.derive(seed: hand.config.seed, stream: stream)
-        return BotBrain.decide(observation: obs, profile: profile, rng: &rng)
+        return BotBrain.decideWithTrace(observation: obs, profile: profile, rng: &rng)
     }
 }

@@ -82,6 +82,9 @@ final class GameViewModel: ObservableObject {
     private var autoDealTask: Task<Void, Never>?
     private var lastActionText: [Int: String] = [:]
     private var winnings: [Int: Int] = [:]
+    /// Observed public tendencies per seat, refreshed at each hand start and
+    /// passed to Advanced/Elite bots for bounded adaptation (§29–30).
+    private var currentTendencies: [Int: SeatTendencies] = [:]
     /// Street commitments as the table should DISPLAY them. The engine resets
     /// its own street counters the instant a betting round closes; this copy
     /// persists until the chip-sweep animation has carried the chips to the
@@ -184,6 +187,7 @@ final class GameViewModel: ObservableObject {
         let config = currentSession.nextHandConfig()
         session = currentSession
         lastSeed = config.seed
+        currentTendencies = TendencyObserver.compute(histories: Array(store.loadHistories().suffix(120)))
         let newHand = PokerHand(config: config)
         hand = newHand
         for seat in newHand.seats where seat.committedThisStreet > 0 {
@@ -207,11 +211,18 @@ final class GameViewModel: ObservableObject {
                 return // resumed by submitHeroAction
             }
             guard let profile = session.botProfile(forSeat: seat) else { break }
+            let tendencies = currentTendencies
             let decisionTask = Task.detached(priority: .userInitiated) { [hand] in
-                return BotDecider.decide(hand: hand, seat: seat, profile: profile)
+                return BotDecider.decideWithTrace(hand: hand, seat: seat, profile: profile, tendencies: tendencies)
             }
-            await pause(settings.speed.botDelay)
-            guard let decision = await decisionTask.value, !Task.isCancelled else { break }
+            // Timing with controlled noise (§31): varies with pot pressure and
+            // a seeded jitter, never with the bot's actual hand strength.
+            var timingRng = SeededRNG.derive(seed: hand.config.seed, stream: 5000 &+ UInt64(hand.decisions.count))
+            let potPressure = min(0.6, Double(hand.pot) / Double(max(1, hand.seats[seat].stack + hand.pot)))
+            let delay = settings.speed.botDelay * (0.7 + timingRng.double01() * 0.6 + potPressure)
+            await pause(delay)
+            guard let full = await decisionTask.value, !Task.isCancelled else { break }
+            let decision = (action: full.action, annotation: full.annotation)
             do {
                 try hand.apply(decision.action, by: seat, annotation: decision.annotation)
             } catch {
@@ -364,8 +375,14 @@ final class GameViewModel: ObservableObject {
         }
         publish()
 
-        // Persist: session state and complete hand history.
-        let history = HandHistory(date: Date(), heroSeat: heroSeatIndex, playerNames: names, hand: hand)
+        // Persist: session state and complete hand history, including the
+        // reproducible result-independent analysis of hero decisions (§32).
+        var history = HandHistory(date: Date(), heroSeat: heroSeatIndex, playerNames: names, hand: hand)
+        let analysisInput = history
+        let analyses = await Task.detached(priority: .utility) {
+            return HandAnalyzer.analyze(history: analysisInput)
+        }.value
+        history.analyses = analyses
         store.appendHistory(history)
         currentSession.complete(hand: hand)
         session = currentSession

@@ -1,28 +1,60 @@
 import Foundation
 
-/// The recognizable playing styles available in the first milestone.
+/// Recognizable playing styles (§9). Archetypes are bounded modifications of
+/// one coherent strategic baseline, not unrelated procedural code.
 public enum BotArchetype: String, Codable, CaseIterable, Sendable {
     case nit
     case callingStation
     case looseAggressive
+    case maniac
+    case solidRegular
+    case trapper
 
     public var displayName: String {
         switch self {
         case .nit: return "Nit"
         case .callingStation: return "Calling Station"
         case .looseAggressive: return "Loose-Aggressive"
+        case .maniac: return "Maniac"
+        case .solidRegular: return "Solid Regular"
+        case .trapper: return "Trapper"
         }
     }
 }
 
+/// Difficulty changes strategic quality only — never dealt cards (§10).
 public enum BotDifficulty: String, Codable, CaseIterable, Sendable {
     case beginner
     case intermediate
+    case advanced
+    case elite
 
     public var displayName: String {
         switch self {
         case .beginner: return "Beginner"
         case .intermediate: return "Intermediate"
+        case .advanced: return "Advanced"
+        case .elite: return "Elite"
+        }
+    }
+
+    /// Monte Carlo budget for one bot decision (§17, §46).
+    public var equityIterations: Int {
+        switch self {
+        case .beginner: return 90
+        case .intermediate: return 160
+        case .advanced: return 260
+        case .elite: return 380
+        }
+    }
+
+    /// Score noise: beginners misjudge spots, elite bots rarely do.
+    public var decisionNoise: Double {
+        switch self {
+        case .beginner: return 0.5
+        case .intermediate: return 0.22
+        case .advanced: return 0.1
+        case .elite: return 0.05
         }
     }
 }
@@ -116,14 +148,74 @@ public struct BotProfile: Codable, Equatable, Sendable, Identifiable {
         )
     }
 
-    /// The standard five-bot lineup for a quick cash session.
+    public static func maniac(name: String, symbolName: String, difficulty: BotDifficulty) -> BotProfile {
+        return BotProfile(
+            name: name,
+            symbolName: symbolName,
+            archetype: .maniac,
+            difficulty: difficulty,
+            looseness: 0.62,
+            aggression: 0.95,
+            bluffFrequency: 0.55,
+            callStickiness: 0.55,
+            sizingJitter: 0.45,
+            positionAwareness: difficulty == .beginner ? 0.2 : 0.5,
+            note: "Raises everything, overbets often. Let them hang themselves."
+        )
+    }
+
+    public static func solidRegular(name: String, symbolName: String, difficulty: BotDifficulty) -> BotProfile {
+        return BotProfile(
+            name: name,
+            symbolName: symbolName,
+            archetype: .solidRegular,
+            difficulty: difficulty,
+            looseness: 0.30,
+            aggression: 0.60,
+            bluffFrequency: 0.25,
+            callStickiness: 0.42,
+            sizingJitter: 0.12,
+            positionAwareness: 0.85,
+            note: "Disciplined ranges, sensible sizes. Few easy chips here."
+        )
+    }
+
+    public static func trapper(name: String, symbolName: String, difficulty: BotDifficulty) -> BotProfile {
+        return BotProfile(
+            name: name,
+            symbolName: symbolName,
+            archetype: .trapper,
+            difficulty: difficulty,
+            looseness: 0.24,
+            aggression: 0.35,
+            bluffFrequency: 0.12,
+            callStickiness: 0.6,
+            sizingJitter: 0.18,
+            positionAwareness: 0.6,
+            note: "Quiet until it isn't. Sudden raises mean monsters."
+        )
+    }
+
+    /// The standard five-bot lineup for a quick cash session. Higher
+    /// difficulties introduce the fuller archetype cast.
     public static func defaultLineup(difficulty: BotDifficulty) -> [BotProfile] {
-        return [
-            .nit(name: "Marta", symbolName: "eyeglasses", difficulty: difficulty),
-            .callingStation(name: "Gus", symbolName: "cup.and.saucer.fill", difficulty: difficulty),
-            .looseAggressive(name: "Dana", symbolName: "bolt.fill", difficulty: difficulty),
-            .nit(name: "Ivan", symbolName: "clock.fill", difficulty: difficulty),
-            .looseAggressive(name: "Rex", symbolName: "flame.fill", difficulty: difficulty)
-        ]
+        switch difficulty {
+        case .beginner, .intermediate:
+            return [
+                .nit(name: "Marta", symbolName: "eyeglasses", difficulty: difficulty),
+                .callingStation(name: "Gus", symbolName: "cup.and.saucer.fill", difficulty: difficulty),
+                .looseAggressive(name: "Dana", symbolName: "bolt.fill", difficulty: difficulty),
+                .nit(name: "Ivan", symbolName: "clock.fill", difficulty: difficulty),
+                .looseAggressive(name: "Rex", symbolName: "flame.fill", difficulty: difficulty)
+            ]
+        case .advanced, .elite:
+            return [
+                .solidRegular(name: "Vera", symbolName: "chart.bar.fill", difficulty: difficulty),
+                .callingStation(name: "Gus", symbolName: "cup.and.saucer.fill", difficulty: difficulty),
+                .looseAggressive(name: "Dana", symbolName: "bolt.fill", difficulty: difficulty),
+                .maniac(name: "Kaz", symbolName: "tornado", difficulty: difficulty),
+                .trapper(name: "Sable", symbolName: "moon.fill", difficulty: difficulty)
+            ]
+        }
     }
 }
