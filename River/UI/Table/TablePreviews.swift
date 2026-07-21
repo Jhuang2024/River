@@ -72,7 +72,7 @@ enum PreviewData {
         seat: 0, canFold: true, canCheck: false, callCost: 6, fullAmountOwed: 6,
         betRaise: BetRaiseOptions(kind: .raise, minTo: 10, minFullTo: 10, maxTo: 197)
     )
-    return TableView(game: PreviewData.gameModel(table: table, actions: actions, boardVisible: 0))
+    TableView(game: PreviewData.gameModel(table: table, actions: actions, boardVisible: 0))
         .environmentObject(PreviewData.settings)
 }
 
@@ -86,7 +86,7 @@ enum PreviewData {
         seat: 0, canFold: true, canCheck: true, callCost: 0, fullAmountOwed: 0,
         betRaise: BetRaiseOptions(kind: .bet, minTo: 2, minFullTo: 2, maxTo: 195)
     )
-    return TableView(game: PreviewData.gameModel(table: table, actions: actions, boardVisible: 3))
+    TableView(game: PreviewData.gameModel(table: table, actions: actions, boardVisible: 3))
         .environmentObject(PreviewData.settings)
 }
 
@@ -108,7 +108,7 @@ enum PreviewData {
         seats: allInSeats
     )
     let actions = AvailableActions(seat: 0, canFold: true, canCheck: false, callCost: 96, fullAmountOwed: 96, betRaise: nil)
-    return TableView(game: PreviewData.gameModel(table: table, actions: actions, boardVisible: 5))
+    TableView(game: PreviewData.gameModel(table: table, actions: actions, boardVisible: 5))
         .environmentObject(PreviewData.settings)
 }
 

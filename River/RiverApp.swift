@@ -145,7 +145,9 @@ struct TableCoverView: View {
                         SessionResultsView(path: $path)
                     case .replay(let history):
                         HandReplayView(history: history)
-                    case .setup:
+                    case .setup, .tournamentSetup:
+                        // Setup screens live in the Play tab, never inside
+                        // the table cover.
                         EmptyView()
                     }
                 }
