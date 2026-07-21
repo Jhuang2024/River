@@ -21,8 +21,8 @@ enum PreviewData {
     static func table(board: [Card], pot: Int, street: Street, heroCards: [Card], acting: Int = 0,
                       seats: [SeatUIState]? = nil) -> TableUIState {
         let defaultSeats = [
-            seat(0, name: "You", symbol: "person.fill", stack: 197, position: "BTN", hero: true,
-                 cards: heroCards, button: true, blind: nil),
+            seat(0, name: "You", symbol: "person.fill", stack: 197, button: true, blind: nil,
+                 position: "BTN", hero: true, cards: heroCards),
             seat(1, name: "Marta", symbol: "eyeglasses", stack: 214, committed: 1, blind: "SB", position: "SB"),
             seat(2, name: "Gus", symbol: "cup.and.saucer.fill", stack: 180, committed: 2, blind: "BB", position: "BB"),
             seat(3, name: "Dana", symbol: "bolt.fill", stack: 305, committed: 6, position: "UTG", action: "Raises to 6"),
@@ -92,14 +92,14 @@ enum PreviewData {
 
 #Preview("River all-in decision") {
     let allInSeats = [
-        PreviewData.seat(0, name: "You", symbol: "person.fill", stack: 150, position: "BB", hero: true,
-                         cards: [Card(.queen, .clubs), Card(.queen, .diamonds)], acting: true, blind: "BB"),
+        PreviewData.seat(0, name: "You", symbol: "person.fill", stack: 150, acting: true, blind: "BB",
+                         position: "BB", hero: true, cards: [Card(.queen, .clubs), Card(.queen, .diamonds)]),
         PreviewData.seat(1, name: "Marta", symbol: "eyeglasses", stack: 214, folded: true, position: "UTG"),
         PreviewData.seat(2, name: "Gus", symbol: "cup.and.saucer.fill", stack: 180, folded: true, position: "HJ"),
         PreviewData.seat(3, name: "Dana", symbol: "bolt.fill", stack: 0, committed: 96, allIn: true,
                          position: "CO", action: "All-in 96"),
-        PreviewData.seat(4, name: "Ivan", symbol: "clock.fill", stack: 92, folded: true, position: "BTN", button: true),
-        PreviewData.seat(5, name: "Rex", symbol: "flame.fill", stack: 255, folded: true, position: "SB", blind: "SB")
+        PreviewData.seat(4, name: "Ivan", symbol: "clock.fill", stack: 92, folded: true, button: true, position: "BTN"),
+        PreviewData.seat(5, name: "Rex", symbol: "flame.fill", stack: 255, folded: true, blind: "SB", position: "SB")
     ]
     let table = PreviewData.table(
         board: [Card(.king, .spades), Card(.eight, .diamonds), Card(.four, .clubs), Card(.two, .hearts), Card(.nine, .spades)],
