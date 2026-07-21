@@ -383,7 +383,9 @@ struct AppSettings: Codable, Equatable {
 
     /// Reads one field, keeping the default when the key is absent or invalid.
     private static func field<T: Decodable>(_ container: KeyedDecodingContainer<CodingKeys>, _ key: CodingKeys, _ fallback: T) -> T {
-        if let wrapped = try? container.decodeIfPresent(T.self, forKey: key), let value = wrapped {
+        // try? flattens the nested optional: nil here means the key was
+        // absent OR held an invalid value — either way, keep the default.
+        if let value = try? container.decodeIfPresent(T.self, forKey: key) {
             return value
         }
         return fallback
