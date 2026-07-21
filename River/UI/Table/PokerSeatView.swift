@@ -137,17 +137,19 @@ struct DealerButtonView: View {
 /// seat and the pot. A small stack plus an exact monospaced label (§22).
 struct ChipStackView: View {
     let amount: Int
+    /// Cosmetic chip colour (§42); azure by default.
+    var chipColor: Color = Theme.chipCommitted
 
     var body: some View {
         if amount > 0 {
             HStack(spacing: 3) {
                 ZStack {
                     Circle()
-                        .fill(Theme.chipCommitted)
+                        .fill(chipColor)
                         .frame(width: 11, height: 11)
                         .offset(y: -2.5)
                     Circle()
-                        .fill(Theme.chipCommitted.opacity(0.85))
+                        .fill(chipColor.opacity(0.85))
                         .frame(width: 11, height: 11)
                         .overlay(Circle().strokeBorder(Color.white.opacity(0.55), lineWidth: 1))
                 }

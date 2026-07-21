@@ -188,7 +188,7 @@ struct TableView: View {
         return ZStack {
             // Felt surface.
             RoundedRectangle(cornerRadius: size.width * 0.40, style: .continuous)
-                .fill(Theme.tableGradient)
+                .fill(Theme.tableGradient(for: settingsStore.settings.tableTheme))
                 .overlay(
                     RoundedRectangle(cornerRadius: size.width * 0.40, style: .continuous)
                         .strokeBorder(Theme.rail, lineWidth: 7)
@@ -248,7 +248,7 @@ struct TableView: View {
                         )
                     }
                     // Committed chips travel to the pot when sweeping (§22).
-                    ChipStackView(amount: seat.committed)
+                    ChipStackView(amount: seat.committed, chipColor: Theme.chipColor(for: settingsStore.settings.chipStyle))
                         .position(
                             x: (game.chipsSweeping ? 0.5 : chipAnchor(for: seat.id).x) * size.width,
                             y: (game.chipsSweeping ? 0.50 : chipAnchor(for: seat.id).y) * size.height
@@ -448,7 +448,7 @@ struct TableView: View {
             }
         case .sessionComplete:
             NavigationLink(value: Route.results) {
-                Text("Session results")
+                Text(game.mode == .tournament ? "Tournament result" : "Session results")
                     .riverButton(accent: accent)
             }
             .accessibilityIdentifier("table.results")

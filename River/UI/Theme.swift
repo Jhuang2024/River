@@ -49,6 +49,33 @@ enum Theme {
         endRadius: 340
     )
 
+    /// Cosmetic felt themes (§42) — visual only, never gameplay.
+    static func tableGradient(for theme: TableThemeChoice) -> RadialGradient {
+        let light: Color
+        let dark: Color
+        switch theme {
+        case .classic:
+            light = feltLight; dark = feltDark
+        case .midnight:
+            light = Color(red: 0.10, green: 0.13, blue: 0.22); dark = Color(red: 0.05, green: 0.06, blue: 0.12)
+        case .crimson:
+            light = Color(red: 0.22, green: 0.08, blue: 0.10); dark = Color(red: 0.10, green: 0.03, blue: 0.05)
+        case .slate:
+            light = Color(red: 0.16, green: 0.17, blue: 0.19); dark = Color(red: 0.07, green: 0.08, blue: 0.09)
+        }
+        return RadialGradient(colors: [light, dark], center: .center, startRadius: 30, endRadius: 340)
+    }
+
+    /// Cosmetic chip colours (§42).
+    static func chipColor(for style: ChipStyleChoice) -> Color {
+        switch style {
+        case .azure: return chipCommitted
+        case .ruby: return Color(red: 0.62, green: 0.22, blue: 0.24)
+        case .brass: return Color(red: 0.62, green: 0.52, blue: 0.30)
+        case .mono: return Color(white: 0.55)
+        }
+    }
+
     static let backgroundGradient = LinearGradient(
         colors: [Color(red: 0.085, green: 0.09, blue: 0.105), Color(red: 0.045, green: 0.05, blue: 0.06)],
         startPoint: .top,

@@ -98,10 +98,14 @@ public enum BotDecider {
         hand: PokerHand,
         seat: Int,
         profile: BotProfile,
-        tendencies: [Int: SeatTendencies]
+        tendencies: [Int: SeatTendencies],
+        tournament: TournamentContext? = nil
     ) -> BotBrain.FullDecision? {
         guard let baseObs = hand.observation(for: seat) else { return nil }
-        let obs = tendencies.isEmpty ? baseObs : baseObs.with(tendencies: tendencies)
+        var obs = tendencies.isEmpty ? baseObs : baseObs.with(tendencies: tendencies)
+        if let tournament {
+            obs = obs.with(tournament: tournament)
+        }
         let stream = UInt64(hand.decisions.count) &* 64 &+ UInt64(seat) &+ 7
         var rng = SeededRNG.derive(seed: hand.config.seed, stream: stream)
         return BotBrain.decideWithTrace(observation: obs, profile: profile, rng: &rng)

@@ -142,6 +142,14 @@ public enum PreflopStrategy {
             return Decision(action: PlayerAction(kind: options.kind, toAmount: options.maxTo), note: note(tag))
         }
 
+        // Tournament risk premium (§21, §26): ICM tightens calling ranges when
+        // elimination is on the line. Cash games have no tournament context.
+        var icmTighten = 1.0
+        if let tournament = obs.tournamentContext {
+            let premium = tournament.riskPremium(for: obs.seat, amount: max(available.callCost, obs.myStack / 2))
+            icmTighten = max(0.45, 1.0 - premium * 2.2)
+        }
+
         // ---- Facing an all-in: pure price-aware calling decision (§6).
         if context.facingAllIn && available.callCost > 0 {
             let odds = PotMath.odds(amountToCall: available.callCost, potBeforeCall: obs.pot)
@@ -149,6 +157,7 @@ public enum PreflopStrategy {
             var threshold = config.callShovePercent * (0.6 + (1 - odds.requiredEquity) * 1.2)
             if context.callersSinceRaise > 0 { threshold *= 0.7 }
             if context.raiseCount >= 2 { threshold *= 0.8 }
+            threshold *= icmTighten
             return inRange(threshold) ? call() : fold()
         }
 
@@ -162,7 +171,7 @@ public enum PreflopStrategy {
                 return fold()
             }
             let odds = PotMath.odds(amountToCall: available.callCost, potBeforeCall: obs.pot)
-            let threshold = config.callShovePercent * (0.6 + (1 - odds.requiredEquity) * 1.2)
+            let threshold = config.callShovePercent * (0.6 + (1 - odds.requiredEquity) * 1.2) * icmTighten
             if inRange(threshold * 0.8) {
                 return shove("reshove")
             }

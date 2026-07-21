@@ -27,6 +27,20 @@ struct ProfileView: View {
                             Text(style.displayName).tag(style)
                         }
                     }
+                    Picker("Table felt", selection: $settingsStore.settings.tableTheme) {
+                        ForEach(TableThemeChoice.allCases) { theme in
+                            Text(theme.displayName).tag(theme)
+                        }
+                    }
+                    Picker("Chip style", selection: $settingsStore.settings.chipStyle) {
+                        ForEach(ChipStyleChoice.allCases) { style in
+                            HStack {
+                                Circle().fill(Theme.chipColor(for: style)).frame(width: 12, height: 12)
+                                Text(style.displayName)
+                            }
+                            .tag(style)
+                        }
+                    }
                 }
 
                 Section("Table pace") {
@@ -75,10 +89,25 @@ struct ProfileView: View {
                 Section("Sound & feel") {
                     Toggle("Sound", isOn: $settingsStore.settings.soundEnabled)
                     Toggle("Haptics", isOn: $settingsStore.settings.hapticsEnabled)
+                    if settingsStore.settings.hapticsEnabled {
+                        Picker("Haptic strength", selection: $settingsStore.settings.hapticLevel) {
+                            ForEach(HapticLevel.allCases) { level in
+                                Text(level.displayName).tag(level)
+                            }
+                        }
+                    }
                     Toggle("Show deck seed after hands", isOn: $settingsStore.settings.showSeedAfterHand)
                 }
 
                 Section("Data") {
+                    Picker("Keep hand histories", selection: $settingsStore.settings.historyRetention) {
+                        ForEach(HistoryRetention.allCases) { retention in
+                            Text(retention.displayName).tag(retention)
+                        }
+                    }
+                    Text("Older hands beyond the limit are trimmed automatically; statistics use whatever is stored.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                     Button("Export hand histories (JSON)") {
                         exportHistories()
                     }

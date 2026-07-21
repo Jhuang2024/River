@@ -34,11 +34,20 @@ public struct BotObservation: Equatable, Sendable {
     /// Observed public tendencies per seat, from previous completed hands
     /// (§29). Populated by the session layer; empty when unavailable.
     public var observedTendencies: [Int: SeatTendencies] = [:]
+    /// Public tournament information (players remaining, payouts, stacks).
+    /// nil in cash games — ICM never leaks into cash decisions.
+    public var tournamentContext: TournamentContext? = nil
 
     /// Copy with tendencies attached (observations are otherwise immutable).
     public func with(tendencies: [Int: SeatTendencies]) -> BotObservation {
         var copy = self
         copy.observedTendencies = tendencies
+        return copy
+    }
+
+    public func with(tournament: TournamentContext?) -> BotObservation {
+        var copy = self
+        copy.tournamentContext = tournament
         return copy
     }
 

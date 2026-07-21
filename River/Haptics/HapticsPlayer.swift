@@ -17,6 +17,8 @@ final class HapticsPlayer {
     }
 
     var enabled: Bool = true
+    /// 0 = off, 0.5 = minimal, 1 = standard, 1.3 = strong (§48).
+    var intensityScale: Double = 1.0
 
     private let light = UIImpactFeedbackGenerator(style: .light)
     private let medium = UIImpactFeedbackGenerator(style: .medium)
@@ -25,7 +27,14 @@ final class HapticsPlayer {
     private let notify = UINotificationFeedbackGenerator()
 
     func play(_ effect: Effect) {
-        guard enabled else { return }
+        guard enabled, intensityScale > 0 else { return }
+        // Minimal mode drops the heavy effects entirely (§48).
+        if intensityScale < 0.75 {
+            switch effect {
+            case .allIn, .bigWin, .bigLoss, .raise: return
+            default: break
+            }
+        }
         switch effect {
         case .cardDeal:
             light.impactOccurred(intensity: 0.55)

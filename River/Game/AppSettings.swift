@@ -211,6 +211,99 @@ enum StackDisplayMode: String, Codable, CaseIterable {
     }
 }
 
+
+/// Hand-history retention (§53). Bookmarked hands are always preserved.
+enum HistoryRetention: String, Codable, CaseIterable, Identifiable {
+    case all
+    case last500
+    case last2000
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .all: return "Keep everything"
+        case .last500: return "Last 500 hands"
+        case .last2000: return "Last 2,000 hands"
+        }
+    }
+
+    var detailedLimit: Int {
+        switch self {
+        case .all: return 100_000
+        case .last500: return 500
+        case .last2000: return 2000
+        }
+    }
+}
+
+/// Unlockable table felt themes (§42). Purely cosmetic.
+enum TableThemeChoice: String, Codable, CaseIterable, Identifiable {
+    case classic
+    case midnight
+    case crimson
+    case slate
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .classic: return "Classic Felt"
+        case .midnight: return "Midnight"
+        case .crimson: return "Crimson Room"
+        case .slate: return "Slate"
+        }
+    }
+}
+
+/// Unlockable chip styles (§42). Purely cosmetic.
+enum ChipStyleChoice: String, Codable, CaseIterable, Identifiable {
+    case azure
+    case ruby
+    case brass
+    case mono
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .azure: return "Azure"
+        case .ruby: return "Ruby"
+        case .brass: return "Brass"
+        case .mono: return "Monochrome"
+        }
+    }
+}
+
+/// Haptic intensity levels (§48).
+enum HapticLevel: String, Codable, CaseIterable, Identifiable {
+    case off
+    case minimal
+    case standard
+    case strong
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .off: return "Off"
+        case .minimal: return "Minimal"
+        case .standard: return "Standard"
+        case .strong: return "Strong"
+        }
+    }
+
+    /// Multiplier fed to HapticsPlayer.intensityScale.
+    var intensity: Double {
+        switch self {
+        case .off: return 0
+        case .minimal: return 0.5
+        case .standard: return 1.0
+        case .strong: return 1.3
+        }
+    }
+}
+
 /// All local preferences. Stored as versioned JSON on device; nothing leaves
 /// the phone. Decoding is field-by-field resilient so adding settings never
 /// wipes existing ones.
@@ -235,6 +328,11 @@ struct AppSettings: Codable, Equatable {
     var swipeDownToFold: Bool = false
     var autoDeal: AutoDealSetting = .manual
     var decisionTimer: DecisionTimerSetting = .off
+    // Cosmetics & storage (§42, §53).
+    var tableTheme: TableThemeChoice = .classic
+    var chipStyle: ChipStyleChoice = .azure
+    var historyRetention: HistoryRetention = .last2000
+    var hapticLevel: HapticLevel = .standard
     // Layout and display.
     var leftHandedMode: Bool = false
     var stackDisplay: StackDisplayMode = .chips
@@ -278,6 +376,7 @@ struct AppSettings: Codable, Equatable {
         case showHandStrength, showPotOdds, showRequiredEquity, showBoardTexture
         case allowRecommendations, revealFoldedBotCards
         case confirmAllIn, protectStrongHands, swipeDownToFold, autoDeal, decisionTimer
+        case tableTheme, chipStyle, historyRetention, hapticLevel
         case leftHandedMode, stackDisplay, showSeedAfterHand
         case preferredHandsTarget, preferredDifficulty, hasCompletedOnboarding
     }
@@ -309,6 +408,10 @@ struct AppSettings: Codable, Equatable {
         swipeDownToFold = AppSettings.field(c, .swipeDownToFold, false)
         autoDeal = AppSettings.field(c, .autoDeal, .manual)
         decisionTimer = AppSettings.field(c, .decisionTimer, .off)
+        tableTheme = AppSettings.field(c, .tableTheme, .classic)
+        chipStyle = AppSettings.field(c, .chipStyle, .azure)
+        historyRetention = AppSettings.field(c, .historyRetention, .last2000)
+        hapticLevel = AppSettings.field(c, .hapticLevel, .standard)
         leftHandedMode = AppSettings.field(c, .leftHandedMode, false)
         stackDisplay = AppSettings.field(c, .stackDisplay, .chips)
         showSeedAfterHand = AppSettings.field(c, .showSeedAfterHand, false)

@@ -4,9 +4,9 @@ A serious, offline No-Limit Texas Hold'em simulator and training system for iPho
 disguised as a fast, tense mobile game. Fictional chips only — nothing to buy,
 no ads, no accounts, no network.
 
-## Current status — Phase 1 (first playable milestone)
+## Current status — feature complete
 
-- Six-max cash game: you + five AI opponents, blinds 1/2, 200-chip (100 BB) stacks
+- Six-max and heads-up cash games: you + AI opponents, blinds 1/2, 200-chip (100 BB) stacks
 - Complete No-Limit Hold'em rules: correct action order, blinds, min-raises,
   incomplete all-in raises (action re-opening handled exactly), multiple all-ins,
   main/side pots, split pots and odd-chip distribution, heads-up rules
@@ -31,9 +31,8 @@ player-selected accent colour), monospaced digits for every number that
 changes, and a portrait table built in three regions — thin status bar, the
 six-max table, and a thumb-reach hero region.
 
-- Tab shell: **Play**, **Review**, **Profile** (Train and Progress arrive with
-  their feature phases). The live table is a full-screen destination outside
-  the tabs.
+- Tab shell: **Play**, **Train**, **Progress**, **Review**, **Profile**. The
+  live table is a full-screen destination outside the tabs.
 - Contextual action bar (Fold separated; labels carry amounts), bet-sizing
   sheet with adaptive presets (BB multiples preflop, pot fractions postflop),
   integer-snapping slider and exact entry.
@@ -48,7 +47,52 @@ six-max table, and a thumb-reach hero region.
 - First launch asks three questions (experience, help level, first goal) and
   configures the starting experience — no accounts, no tour.
 - Four deck styles including a colourblind-friendly four-colour deck; six
-  accent colours; VoiceOver labels on cards and seats.
+  accent colours; four cosmetic felt themes and chip styles (visual only);
+  VoiceOver labels on cards and seats.
+
+## Training system
+
+- **Nine academies, 61 lessons**: Poker Foundations, Preflop Strategy, Flop,
+  Turn, River, Poker Mathematics, Exploitative Play, Tournament & Short Stack,
+  and Advanced Ranges. Lessons are short by design, gated by prerequisites
+  (validated acyclic graph), and each ends in a drill with a mastery
+  threshold.
+- **Real-engine drills.** Live-decision drills (preflop spots, blind defence,
+  push/fold, postflop streets) are generated as genuine `PokerHand` states and
+  every answer choice is graded by the same result-independent analyzer that
+  grades your recorded play — no parallel mock logic. Knowledge drills
+  (hand reading, showdown winners, pot odds, outs, combos) are computed by the
+  real evaluator and pot math.
+- **Spaced review.** Concept-level review states stretch on success and reset
+  on lapses (no punishment for missed days); due concepts surface in the Train
+  tab and in recommendations.
+- **Daily challenge** (same seeded five-question set for everyone each day,
+  first attempt counts, streak tracking) and **endless practice** with focus
+  filters (preflop / postflop / river / mathematics / full mix biased toward
+  weak concepts).
+- **Adaptive recommendations**: confident statistical leaks first, then due
+  reviews, then the next unlocked lesson.
+
+## Tournaments and progression
+
+- **Sit-and-Go tournaments**: six players, three structures (Standard, Turbo,
+  Hyper), hand-based blind levels with antes, correct eliminations and side
+  pots, moving button, resume support, final standings with fictional payouts.
+- **Exact ICM** (Malmuth–Harville) with tested invariants; bots price
+  bubble risk through an ICM risk premium — tournament logic never leaks into
+  cash games.
+- **Stakes Ladder campaign**: seven tiers from Kitchen Table to Final Table,
+  each requiring decision quality over volume (severe-mistake rate, not
+  results) plus a themed boss table (The Collector, The Wall, The Flood, The
+  Mirror, The Surgeon, The Finalist) — strong or unusual, never cheating.
+- **Skill rating** (800–1500) from confidence-weighted decision quality with
+  per-street breakdowns, honest sample-size confidence and trend.
+- **Leak detection**: ten statistical leak definitions (over-limping, blind
+  overfolds, c-bet extremes, river overcalls, missed value, push/fold
+  passivity…) with baselines, minimum samples and links to the exact lesson
+  that fixes each leak.
+- **Achievements** (20) for skill and variety milestones — no pure-luck
+  trophies. Local only.
 
 ## AI and analysis
 
@@ -100,7 +144,10 @@ Packages/RiverKit/      Pure-Swift engine package (no UI dependencies)
     Rules/              Betting engine and hand state machine
     Pots/               Exact side-pot construction
     AI/                 Bot profiles, observations, decision logic, equity
-    Analysis/           Advisor and session statistics
+    Analysis/           Advisor, grading, statistics, leak detection
+    Curriculum/         Lessons, drill engine, daily challenge, spaced review
+    Tournament/         Sit-and-Go state machine and exact ICM
+    Progression/        Stakes Ladder campaign, skill rating, achievements
     History/            Hand events, histories, replayer
     Session/            Cash session state
     Persistence/        Versioned local JSON store
@@ -127,7 +174,11 @@ Coverage includes deck uniqueness and shuffle determinism, evaluator edge cases
 minimum raises, short all-in re-opening rules, heads-up order, side pots, split
 pots and odd chips, chip-conservation chaos tests over hundreds of random hands,
 replay determinism, hidden-information isolation for bots, session flow and
-persistence round-trips.
+persistence round-trips, ICM invariants (conservation, monotonicity, sublinear
+equity, bubble risk premiums), tournament eliminations/placings/payouts through
+real rigged hands, curriculum validation (acyclic prerequisites, quiz
+integrity, drill determinism), spaced-review scheduling, campaign completion
+rules, leak-detector silence without samples, and achievement evidence.
 
 ## Design principles
 
@@ -138,10 +189,10 @@ persistence round-trips.
 - Post-hand analysis judges decisions with the information available at the
   time, not by results.
 
-## Roadmap
+## Data & privacy
 
-Phase 2: interactive tutorial, guided beginner drills, richer post-hand review.
-Phase 3: weighted ranges, stronger postflop AI, more archetypes and difficulties.
-Phase 4: six-player sit-and-go tournaments with push/fold training and ICM.
-Phase 5: stakes ladder, skill rating, leak detection, focused trainers.
-Phase 6: elite AI, opponent adaptation, customization, accessibility, export.
+Everything is stored as versioned JSON on the device: settings, sessions,
+tournaments, hand histories (configurable retention: 500 / 2,000 / unlimited),
+training progress, campaign state and tournament records. Decoding is
+field-by-field resilient, so app updates never wipe progress. Hand histories
+export as JSON from Profile. Nothing ever leaves the phone.

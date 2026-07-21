@@ -10,8 +10,14 @@ struct QuickCashSetupView: View {
 
     @State private var handsTarget: Int = 20
     @State private var difficulty: BotDifficulty = .beginner
+    @State private var headsUp = false
 
     private let handOptions = [5, 10, 20, 50, 0]
+
+    private var lineup: [BotProfile] {
+        let full = BotProfile.defaultLineup(difficulty: difficulty)
+        return headsUp ? Array(full.prefix(1)) : full
+    }
 
     var body: some View {
         ZStack {
@@ -34,6 +40,18 @@ struct QuickCashSetupView: View {
                             .foregroundStyle(Theme.textSecondary)
                     }
 
+                    section("Table") {
+                        HStack(spacing: 8) {
+                            choiceChip("Six-max", selected: !headsUp) { headsUp = false }
+                            choiceChip("Heads-up", selected: headsUp) { headsUp = true }
+                        }
+                        Text(headsUp
+                             ? "One-on-one: wide ranges, relentless aggression, positional duels."
+                             : "Full table: five AI opponents with distinct styles.")
+                            .font(.system(size: 12, design: .rounded))
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+
                     section("Opponents") {
                         HStack(spacing: 8) {
                             ForEach(BotDifficulty.allCases, id: \.self) { level in
@@ -43,7 +61,7 @@ struct QuickCashSetupView: View {
                             }
                         }
                         VStack(spacing: 8) {
-                            ForEach(BotProfile.defaultLineup(difficulty: difficulty)) { bot in
+                            ForEach(lineup) { bot in
                                 HStack(spacing: 10) {
                                     Image(systemName: bot.symbolName)
                                         .font(.system(size: 14))
@@ -116,7 +134,7 @@ struct QuickCashSetupView: View {
         let config = SessionConfig(
             handsTarget: handsTarget,
             seed: UITestSupport.seedOverride ?? UInt64.random(in: UInt64.min...UInt64.max),
-            bots: BotProfile.defaultLineup(difficulty: difficulty)
+            bots: lineup
         )
         path = NavigationPath()
         // The table presents itself as a full-screen cover once the session starts.

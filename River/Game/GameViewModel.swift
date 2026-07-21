@@ -36,12 +36,30 @@ struct TableUIState: Equatable {
     var handsTarget: Int
     var smallBlind: Int
     var bigBlind: Int
+    var ante: Int
     var statusText: String
     var isHandComplete: Bool
+    /// "Level 3 · 5 left · next blinds in 4 hands" during tournaments.
+    var tournamentLine: String?
 
     var blindsText: String {
-        return "\(smallBlind)/\(bigBlind)"
+        return ante > 0 ? "\(smallBlind)/\(bigBlind) (\(ante))" : "\(smallBlind)/\(bigBlind)"
     }
+}
+
+/// Campaign session tagging (§23): which tier a table counts toward.
+struct CampaignTag: Codable, Equatable {
+    let tier: Int
+    let isBoss: Bool
+}
+
+/// Small persisted odds-and-ends (§52): tournament record for achievements.
+struct PlayerMeta: Codable, Equatable {
+    var tournamentsFinished: Int = 0
+    var tournamentWins: Int = 0
+    var bestTournamentPlace: Int? = nil
+
+    init() {}
 }
 
 /// What the session flow is currently doing.
@@ -75,7 +93,15 @@ final class GameViewModel: ObservableObject {
     /// Remaining decision-timer fraction (1...0), nil when no timer runs.
     @Published private(set) var heroTimerFraction: Double?
 
+    enum SessionMode {
+        case cash
+        case tournament
+    }
+
     private(set) var session: CashSessionState?
+    private(set) var mode: SessionMode = .cash
+    private(set) var tournament: TournamentState?
+    private(set) var campaignTag: CampaignTag?
     private var hand: PokerHand?
     private var loopTask: Task<Void, Never>?
     private var timerTask: Task<Void, Never>?
@@ -119,12 +145,20 @@ final class GameViewModel: ObservableObject {
         return saved.canContinue
     }
 
+    var hasSavedTournament: Bool {
+        guard let saved = store.load(TournamentState.self, from: "current-tournament") else { return false }
+        return saved.canContinue
+    }
+
     var isTablePresented: Bool {
         return phase != .idle
     }
 
-    func startNewSession(config: SessionConfig) {
+    func startNewSession(config: SessionConfig, campaign: CampaignTag? = nil) {
         cancelAllTasks()
+        mode = .cash
+        tournament = nil
+        campaignTag = campaign
         session = CashSessionState(config: config, startDate: Date())
         saveSession()
         phase = .playing
@@ -134,7 +168,41 @@ final class GameViewModel: ObservableObject {
     func resumeSavedSession() {
         cancelAllTasks()
         guard let saved = store.load(CashSessionState.self, from: PersistenceStore.FileName.session), saved.canContinue else { return }
+        mode = .cash
+        tournament = nil
+        campaignTag = nil
         session = saved
+        phase = .playing
+        startNextHand()
+    }
+
+    func startTournament(structure: TournamentStructure, difficulty: BotDifficulty, seed: UInt64) {
+        let config = TournamentConfig(
+            structure: structure,
+            seed: seed,
+            bots: BotProfile.defaultLineup(difficulty: difficulty)
+        )
+        startTournament(config: config)
+    }
+
+    func startTournament(config: TournamentConfig) {
+        cancelAllTasks()
+        mode = .tournament
+        session = nil
+        campaignTag = nil
+        tournament = TournamentState(config: config, startDate: Date())
+        saveTournament()
+        phase = .playing
+        startNextHand()
+    }
+
+    func resumeSavedTournament() {
+        cancelAllTasks()
+        guard let saved = store.load(TournamentState.self, from: "current-tournament"), saved.canContinue else { return }
+        mode = .tournament
+        session = nil
+        campaignTag = nil
+        tournament = saved
         phase = .playing
         startNextHand()
     }
@@ -142,6 +210,7 @@ final class GameViewModel: ObservableObject {
     func exitToMenu() {
         cancelAllTasks()
         saveSession()
+        saveTournament()
         hand = nil
         table = nil
         heroActions = nil
@@ -152,8 +221,34 @@ final class GameViewModel: ObservableObject {
     }
 
     func saveSession() {
-        if let session {
+        if mode == .cash, let session {
             try? store.save(session, as: PersistenceStore.FileName.session)
+        }
+    }
+
+    func saveTournament() {
+        if mode == .tournament, let tournament {
+            try? store.save(tournament, as: "current-tournament")
+        }
+    }
+
+    // MARK: - Mode-agnostic accessors
+
+    private var currentNames: [String] {
+        switch mode {
+        case .cash: return session?.playerNames ?? []
+        case .tournament: return tournament?.playerNames ?? []
+        }
+    }
+
+    private func profileForSeat(_ seat: Int) -> BotProfile? {
+        guard seat != heroSeatIndex else { return nil }
+        switch mode {
+        case .cash:
+            return session?.botProfile(forSeat: seat)
+        case .tournament:
+            guard let bots = tournament?.config.bots, bots.indices.contains(seat - 1) else { return nil }
+            return bots[seat - 1]
         }
     }
 
@@ -169,7 +264,23 @@ final class GameViewModel: ObservableObject {
     // MARK: - Hand lifecycle
 
     func startNextHand() {
-        guard var currentSession = session, currentSession.canContinue else {
+        let config: HandConfig?
+        switch mode {
+        case .cash:
+            guard var currentSession = session, currentSession.canContinue else {
+                phase = .sessionComplete
+                return
+            }
+            config = currentSession.nextHandConfig()
+            session = currentSession
+        case .tournament:
+            guard let currentTournament = tournament, currentTournament.canContinue else {
+                phase = .sessionComplete
+                return
+            }
+            config = currentTournament.nextHandConfig()
+        }
+        guard let handConfig = config else {
             phase = .sessionComplete
             return
         }
@@ -184,11 +295,9 @@ final class GameViewModel: ObservableObject {
         chipsSweeping = false
         heroHandDescription = nil
         heroDrawLabels = []
-        let config = currentSession.nextHandConfig()
-        session = currentSession
-        lastSeed = config.seed
+        lastSeed = handConfig.seed
         currentTendencies = TendencyObserver.compute(histories: Array(store.loadHistories().suffix(120)))
-        let newHand = PokerHand(config: config)
+        let newHand = PokerHand(config: handConfig)
         hand = newHand
         for seat in newHand.seats where seat.committedThisStreet > 0 {
             displayCommitted[seat.seatIndex] = seat.committedThisStreet
@@ -203,17 +312,18 @@ final class GameViewModel: ObservableObject {
     }
 
     private func runLoop() async {
-        guard let hand, let session else { return }
+        guard let hand else { return }
         while !hand.isComplete && !Task.isCancelled {
             guard let seat = hand.actionOn else { break }
             if seat == heroSeatIndex {
                 presentHeroTurn()
                 return // resumed by submitHeroAction
             }
-            guard let profile = session.botProfile(forSeat: seat) else { break }
+            guard let profile = profileForSeat(seat) else { break }
             let tendencies = currentTendencies
+            let tournamentContext = mode == .tournament ? tournament?.tournamentContext() : nil
             let decisionTask = Task.detached(priority: .userInitiated) { [hand] in
-                return BotDecider.decideWithTrace(hand: hand, seat: seat, profile: profile, tendencies: tendencies)
+                return BotDecider.decideWithTrace(hand: hand, seat: seat, profile: profile, tendencies: tendencies, tournament: tournamentContext)
             }
             // Timing with controlled noise (§31): varies with pot pressure and
             // a seeded jitter, never with the bot's actual hand strength.
@@ -327,7 +437,7 @@ final class GameViewModel: ObservableObject {
 
     /// Showdown sequence (§23): reveal in order, describe, distribute, banner.
     private func finishHand() async {
-        guard let hand, var currentSession = session else { return }
+        guard let hand else { return }
         await animateStreetTransitionIfNeeded()
 
         // Sweep any final-street chips.
@@ -358,9 +468,9 @@ final class GameViewModel: ObservableObject {
             }
         }
         winnings = totalWon
-        let names = currentSession.playerNames
+        let names = currentNames
         let heroNet = hand.seats[heroSeatIndex].stack - hand.seats[heroSeatIndex].startingStack
-        let bigPot = hand.finalPots.reduce(0) { $0 + $1.amount } >= currentSession.config.bigBlind * 30
+        let bigPot = hand.finalPots.reduce(0) { $0 + $1.amount } >= hand.config.bigBlind * 30
         if heroNet > 0 {
             sounds.play(.win)
             if bigPot { haptics.play(.bigWin) }
@@ -383,12 +493,47 @@ final class GameViewModel: ObservableObject {
             return HandAnalyzer.analyze(history: analysisInput)
         }.value
         history.analyses = analyses
-        store.appendHistory(history)
-        currentSession.complete(hand: hand)
-        session = currentSession
-        saveSession()
-        publish()
-        phase = currentSession.canContinue ? .handComplete : .sessionComplete
+        store.appendHistory(history, limit: settings.historyRetention.detailedLimit)
+
+        // Campaign progress counts decision quality, not luck (§24).
+        if let tag = campaignTag {
+            var campaign = store.load(CampaignProgress.self, from: "campaign") ?? CampaignProgress()
+            let severe = analyses.filter { $0.grade == .blunder || $0.grade == .significantMistake }.count
+            campaign.record(tier: tag.tier, isBoss: tag.isBoss, decisions: analyses.count, severe: severe)
+            try? store.save(campaign, as: "campaign")
+        }
+
+        switch mode {
+        case .cash:
+            guard var currentSession = session else { return }
+            currentSession.complete(hand: hand)
+            session = currentSession
+            saveSession()
+            publish()
+            phase = currentSession.canContinue ? .handComplete : .sessionComplete
+        case .tournament:
+            guard var currentTournament = tournament else { return }
+            currentTournament.complete(hand: hand)
+            tournament = currentTournament
+            if currentTournament.isFinished || currentTournament.heroEliminated {
+                // Record the fictional-tournament result for achievements.
+                var meta = store.load(PlayerMeta.self, from: "meta") ?? PlayerMeta()
+                meta.tournamentsFinished += 1
+                let place = currentTournament.place(of: heroSeatIndex)
+                if place == 1 { meta.tournamentWins += 1 }
+                if let place {
+                    meta.bestTournamentPlace = min(meta.bestTournamentPlace ?? 6, place)
+                }
+                try? store.save(meta, as: "meta")
+                store.delete("current-tournament")
+                publish()
+                phase = .sessionComplete
+            } else {
+                saveTournament()
+                publish()
+                phase = .handComplete
+            }
+        }
 
         // Optional auto-deal (§25).
         if phase == .handComplete, let delay = settings.autoDeal.delay {
@@ -533,13 +678,14 @@ final class GameViewModel: ObservableObject {
     // MARK: - Table info providers
 
     func historySections() -> [ActionHistoryBuilder.HistorySection] {
-        guard let hand, let session else { return [] }
-        return ActionHistoryBuilder.sections(events: hand.events, names: session.playerNames, heroSeat: heroSeatIndex)
+        guard let hand else { return [] }
+        return ActionHistoryBuilder.sections(events: hand.events, names: currentNames, heroSeat: heroSeatIndex)
     }
 
     func opponentRead(seat: Int) -> OpponentRead? {
-        guard let session, let profile = session.botProfile(forSeat: seat) else { return nil }
-        let histories = Array(store.loadHistories().suffix(session.handsPlayed))
+        guard let profile = profileForSeat(seat) else { return nil }
+        let handCount = mode == .cash ? (session?.handsPlayed ?? 0) : (tournament?.handsPlayed ?? 0)
+        let histories = Array(store.loadHistories().suffix(handCount))
         let stats = SessionStats.compute(histories: histories, seat: seat)
         return OpponentRead(
             id: seat,
@@ -555,12 +701,12 @@ final class GameViewModel: ObservableObject {
     }
 
     func potBreakdown() -> (entries: [PotBreakdownEntry], total: Int)? {
-        guard let hand, let session else { return nil }
+        guard let hand else { return nil }
         let committed = hand.seats.map { $0.committedTotal }
         let live = Set(hand.liveSeatIndices)
         guard !live.isEmpty else { return nil }
         let result = PotBuilder.build(committed: committed, liveSeats: live)
-        let names = session.playerNames
+        let names = currentNames
         var entries: [PotBreakdownEntry] = []
         for (index, pot) in result.pots.enumerated() {
             entries.append(PotBreakdownEntry(
@@ -601,11 +747,11 @@ final class GameViewModel: ObservableObject {
     }
 
     private func publish() {
-        guard let hand, let session else {
+        guard let hand else {
             table = nil
             return
         }
-        let names = session.playerNames
+        let names = currentNames
         let currentSettings = settings
         let sbSeat = hand.smallBlindSeat
         let bbSeat = hand.bigBlindSeat
@@ -617,7 +763,7 @@ final class GameViewModel: ObservableObject {
             let reveal = isHero
                 || revealedShowdownSeats.contains(index)
                 || (hand.isComplete && currentSettings.revealFoldedBotCards && !seat.holeCards.isEmpty)
-            let profile = session.botProfile(forSeat: index)
+            let profile = profileForSeat(index)
             let offset = ((index - hand.config.buttonIndex) % seatCount + seatCount) % seatCount
             var blindLabel: String? = nil
             if index == sbSeat && index != hand.config.buttonIndex { blindLabel = "SB" }
@@ -641,17 +787,30 @@ final class GameViewModel: ObservableObject {
                 netWon: winnings[index] ?? 0
             ))
         }
+        var tournamentLine: String? = nil
+        if mode == .tournament, let tournament {
+            var line = "Level \(tournament.currentLevelIndex + 1) · \(tournament.playersRemaining) left"
+            if let untilNext = tournament.handsUntilNextLevel {
+                line += " · blinds up in \(untilNext)"
+            }
+            if tournament.onBubble {
+                line += " · BUBBLE"
+            }
+            tournamentLine = line
+        }
         table = TableUIState(
             seats: seatStates,
             board: hand.board,
             pot: hand.pot,
             street: hand.street,
             handNumber: hand.config.handNumber,
-            handsTarget: session.config.handsTarget,
-            smallBlind: session.config.smallBlind,
-            bigBlind: session.config.bigBlind,
+            handsTarget: mode == .cash ? (session?.config.handsTarget ?? 0) : 0,
+            smallBlind: hand.config.smallBlind,
+            bigBlind: hand.config.bigBlind,
+            ante: hand.config.ante,
             statusText: hand.isComplete ? "Hand complete" : hand.street.name,
-            isHandComplete: hand.isComplete
+            isHandComplete: hand.isComplete,
+            tournamentLine: tournamentLine
         )
     }
 
@@ -670,7 +829,13 @@ final class GameViewModel: ObservableObject {
             session = currentSession
         }
         store.delete(PersistenceStore.FileName.session)
+        if mode == .tournament {
+            store.delete("current-tournament")
+        }
         session = nil
+        tournament = nil
+        campaignTag = nil
+        mode = .cash
         hand = nil
         table = nil
         phase = .idle

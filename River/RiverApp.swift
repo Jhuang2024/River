@@ -5,6 +5,7 @@ import RiverKit
 /// full-screen cover outside the tab hierarchy, §1).
 enum Route: Hashable {
     case setup
+    case tournamentSetup
     case results
     case replay(HandHistory)
 }
@@ -24,6 +25,7 @@ enum UITestSupport {
 struct RiverApp: App {
     @StateObject private var settingsStore: SettingsStore
     @StateObject private var game: GameViewModel
+    @StateObject private var training: TrainingStore
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -49,8 +51,10 @@ struct RiverApp: App {
         }
         sounds.enabled = settings.settings.soundEnabled && !UITestSupport.isActive
         haptics.enabled = settings.settings.hapticsEnabled
+        haptics.intensityScale = settings.settings.hapticLevel.intensity
         _settingsStore = StateObject(wrappedValue: settings)
         _game = StateObject(wrappedValue: gameModel)
+        _training = StateObject(wrappedValue: TrainingStore(store: store))
     }
 
     var body: some Scene {
@@ -58,12 +62,16 @@ struct RiverApp: App {
             RootView()
                 .environmentObject(settingsStore)
                 .environmentObject(game)
+                .environmentObject(training)
                 .preferredColorScheme(.dark)
                 .onChange(of: settingsStore.settings.soundEnabled) { _, enabled in
                     game.sounds.enabled = enabled
                 }
                 .onChange(of: settingsStore.settings.hapticsEnabled) { _, enabled in
                     game.haptics.enabled = enabled
+                }
+                .onChange(of: settingsStore.settings.hapticLevel) { _, level in
+                    game.haptics.intensityScale = level.intensity
                 }
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .background || newPhase == .inactive {
@@ -77,8 +85,7 @@ struct RiverApp: App {
     }
 }
 
-/// Tab shell (§1): Play, Review, Profile now; Train and Progress arrive with
-/// their feature phases rather than shipping as decorative placeholders.
+/// Tab shell (§1): Play, Train, Progress, Review, Profile.
 struct RootView: View {
     @EnvironmentObject var game: GameViewModel
     @EnvironmentObject var settingsStore: SettingsStore
@@ -87,6 +94,10 @@ struct RootView: View {
         TabView {
             PlayHomeView()
                 .tabItem { Label("Play", systemImage: "suit.spade.fill") }
+            TrainHomeView()
+                .tabItem { Label("Train", systemImage: "graduationcap.fill") }
+            ProgressHomeView()
+                .tabItem { Label("Progress", systemImage: "chart.line.uptrend.xyaxis") }
             ReviewListView()
                 .tabItem { Label("Review", systemImage: "clock.arrow.circlepath") }
             ProfileView()

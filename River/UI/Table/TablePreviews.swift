@@ -43,8 +43,8 @@ enum PreviewData {
         }
         return TableUIState(
             seats: allSeats, board: board, pot: pot, street: street,
-            handNumber: 7, handsTarget: 20, smallBlind: 1, bigBlind: 2,
-            statusText: street.name, isHandComplete: false
+            handNumber: 7, handsTarget: 20, smallBlind: 1, bigBlind: 2, ante: 0,
+            statusText: street.name, isHandComplete: false, tournamentLine: nil
         )
     }
 

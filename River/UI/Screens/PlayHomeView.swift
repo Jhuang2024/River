@@ -27,8 +27,18 @@ struct PlayHomeView: View {
                 }
             }
             .navigationDestination(for: Route.self) { route in
-                if case .setup = route {
+                switch route {
+                case .setup:
                     QuickCashSetupView(path: $path)
+                case .tournamentSetup:
+                    TournamentSetupView(path: $path)
+                default:
+                    EmptyView()
+                }
+            }
+            .navigationDestination(for: String.self) { destination in
+                if destination == "campaign" {
+                    CampaignView()
                 }
             }
         }
@@ -54,19 +64,33 @@ struct PlayHomeView: View {
 
     private var primaryCard: some View {
         VStack(spacing: Theme.Spacing.m) {
+            if game.hasSavedTournament {
+                ActionButton(title: "Continue tournament", role: .primary, accent: accent, identifier: "play.continueTournament") {
+                    game.resumeSavedTournament()
+                }
+            }
             if game.hasSavedSession {
-                ActionButton(title: "Continue session", role: .primary, accent: accent, identifier: "play.continue") {
+                ActionButton(title: "Continue session", role: game.hasSavedTournament ? .secondary : .primary,
+                             accent: accent, identifier: "play.continue") {
                     game.resumeSavedSession()
                 }
                 ActionButton(title: "New cash game", role: .secondary, accent: accent, identifier: "play.quickCash") {
                     path.append(Route.setup)
                 }
             } else {
-                ActionButton(title: "Quick cash game", role: .primary, accent: accent, identifier: "play.quickCash") {
+                ActionButton(title: "Quick cash game",
+                             role: game.hasSavedTournament ? .secondary : .primary,
+                             accent: accent, identifier: "play.quickCash") {
                     path.append(Route.setup)
                 }
             }
-            Text("Six-max no-limit hold'em against five AI opponents.\nSit-and-Go, Stakes Ladder and Daily Challenge arrive in later updates.")
+            ActionButton(title: "Sit & Go tournament", role: .secondary, accent: accent, identifier: "play.tournament") {
+                path.append(Route.tournamentSetup)
+            }
+            ActionButton(title: "Stakes Ladder", role: .secondary, accent: accent, identifier: "play.campaign") {
+                path.append("campaign")
+            }
+            Text("Six-max no-limit hold'em against adaptive AI opponents.\nCash games, tournaments and a decision-graded campaign.")
                 .font(Theme.Fonts.caption)
                 .foregroundStyle(Theme.textTertiary)
                 .multilineTextAlignment(.center)

@@ -12,12 +12,17 @@ struct SessionResultsView: View {
             Theme.backgroundGradient.ignoresSafeArea()
             ScrollView {
                 VStack(spacing: 22) {
-                    header
-                    if let session = game.session, !session.heroNetByHand.isEmpty {
-                        netGraph(session.heroNetByHand)
-                    }
-                    if let stats = game.sessionStats {
-                        statsGrid(stats)
+                    if let tournament = game.tournament, game.mode == .tournament {
+                        tournamentHeader(tournament)
+                        tournamentLadder(tournament)
+                    } else {
+                        header
+                        if let session = game.session, !session.heroNetByHand.isEmpty {
+                            netGraph(session.heroNetByHand)
+                        }
+                        if let stats = game.sessionStats {
+                            statsGrid(stats)
+                        }
                     }
                     recentHands
                     VStack(spacing: 10) {
@@ -33,13 +38,96 @@ struct SessionResultsView: View {
                 .padding(20)
             }
         }
-        .navigationTitle("Session results")
+        .navigationTitle(game.mode == .tournament ? "Tournament result" : "Session results")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
     }
 
     private var net: Int {
         return game.session?.heroNetTotal ?? 0
+    }
+
+    // MARK: - Tournament summary (§21)
+
+    private func placeText(_ place: Int?) -> String {
+        switch place {
+        case 1: return "1st place"
+        case 2: return "2nd place"
+        case 3: return "3rd place"
+        case .some(let value): return "\(value)th place"
+        case nil: return "Still alive"
+        }
+    }
+
+    private func tournamentHeader(_ tournament: TournamentState) -> some View {
+        let place = tournament.place(of: heroSeatIndex)
+        let prize = tournament.prize(of: heroSeatIndex)
+        return VStack(spacing: 6) {
+            Image(systemName: place == 1 ? "trophy.fill" : (prize > 0 ? "medal.fill" : "flag.checkered"))
+                .font(.system(size: 40))
+                .foregroundStyle(place == 1 ? Theme.caution : (prize > 0 ? Theme.positive : Theme.textSecondary))
+            Text(placeText(place))
+                .font(.system(size: 34, weight: .black, design: .rounded))
+                .foregroundStyle(Theme.textPrimary)
+            if prize > 0 {
+                Text("+\(prize) fictional chips")
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(Theme.positive)
+            }
+            Text("\(tournament.handsPlayed) hands · reached level \(tournament.currentLevelIndex + 1) (\(tournament.currentLevel.smallBlind)/\(tournament.currentLevel.bigBlind))")
+                .font(.system(size: 12, design: .rounded))
+                .foregroundStyle(Theme.textSecondary)
+        }
+        .padding(.top, 10)
+    }
+
+    /// Final standings, best known order: survivors by stack, then busts in
+    /// reverse elimination order.
+    private func tournamentLadder(_ tournament: TournamentState) -> some View {
+        let names = tournament.playerNames
+        var order: [(seat: Int, label: String)] = []
+        let survivors = tournament.stacks.indices
+            .filter { tournament.stacks[$0] > 0 }
+            .sorted { tournament.stacks[$0] > tournament.stacks[$1] }
+        for seat in survivors {
+            let place = tournament.place(of: seat)
+            order.append((seat, place.map { placeText($0) } ?? "\(tournament.stacks[seat]) chips"))
+        }
+        for seat in tournament.eliminationOrder.reversed() {
+            order.append((seat, placeText(tournament.place(of: seat))))
+        }
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("STANDINGS")
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .kerning(1.2)
+                .foregroundStyle(Theme.textSecondary)
+            ForEach(Array(order.enumerated()), id: \.offset) { rank, entry in
+                HStack {
+                    Text("\(rank + 1).")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(Theme.textSecondary)
+                        .frame(width: 24, alignment: .trailing)
+                    Text(entry.seat == heroSeatIndex ? "You" : (names.indices.contains(entry.seat) ? names[entry.seat] : "Seat \(entry.seat + 1)"))
+                        .font(.system(size: 13, weight: entry.seat == heroSeatIndex ? .bold : .regular, design: .rounded))
+                        .foregroundStyle(entry.seat == heroSeatIndex ? settingsStore.accent : Theme.textPrimary)
+                    Spacer()
+                    let prize = tournament.prize(of: entry.seat)
+                    if prize > 0 {
+                        Text("+\(prize)")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundStyle(Theme.positive)
+                    }
+                    Text(entry.label)
+                        .font(.system(size: 12, design: .rounded))
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+        }
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: 14).fill(Theme.backgroundElevated))
     }
 
     private var header: some View {
@@ -135,7 +223,8 @@ struct SessionResultsView: View {
     }
 
     private var recentHands: some View {
-        let histories = Array(game.store.loadHistories().suffix(game.session?.handsPlayed ?? 20).reversed())
+        let handCount = game.mode == .tournament ? (game.tournament?.handsPlayed ?? 20) : (game.session?.handsPlayed ?? 20)
+        let histories = Array(game.store.loadHistories().suffix(handCount).reversed())
         return VStack(alignment: .leading, spacing: 10) {
             Text("HANDS")
                 .font(.system(size: 11, weight: .bold, design: .rounded))
@@ -150,6 +239,13 @@ struct SessionResultsView: View {
     }
 
     private func playAgain() {
+        if game.mode == .tournament, let previous = game.tournament {
+            var config = previous.config
+            config.seed = UITestSupport.seedOverride ?? UInt64.random(in: UInt64.min...UInt64.max)
+            path = NavigationPath()
+            game.startTournament(config: config)
+            return
+        }
         guard let previous = game.session else { return }
         var config = previous.config
         config.seed = UITestSupport.seedOverride ?? UInt64.random(in: UInt64.min...UInt64.max)
