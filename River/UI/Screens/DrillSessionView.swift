@@ -213,10 +213,10 @@ struct DrillSessionView: View {
         guard selectedChoice == nil, let question else { return }
         selectedChoice = choiceIndex
         let choice = question.choices[choiceIndex]
-        earnedCredit += choice.credit
-        if choice.countsAsCorrect { correctCount += 1 }
+        earnedCredit += choice.grade.credit
+        if choice.grade.countsAsCorrect { correctCount += 1 }
         let tags = question.conceptTag.isEmpty ? activity.conceptTagsFallback : [question.conceptTag]
-        training.recordAnswer(conceptTags: tags, correct: choice.countsAsCorrect)
+        training.recordAnswer(conceptTags: tags, correct: choice.grade.countsAsCorrect)
     }
 
     private func advance() {
