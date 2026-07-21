@@ -49,7 +49,7 @@ enum Theme {
         endRadius: 340
     )
 
-    /// Cosmetic felt themes (§42) — visual only, never gameplay.
+    /// Cosmetic felt themes (§42) - visual only, never gameplay.
     static func tableGradient(for theme: TableThemeChoice) -> RadialGradient {
         let light: Color
         let dark: Color

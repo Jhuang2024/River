@@ -1,6 +1,6 @@
 import Foundation
 
-/// An unordered pair of hole cards — one exact Hold'em starting combination.
+/// An unordered pair of hole cards - one exact Hold'em starting combination.
 /// There are exactly 1,326 of these. Blocker and flush logic operates on
 /// exact combinations, never on canonical labels alone (§4).
 public struct HoleCombo: Hashable, Codable, Sendable, CustomStringConvertible {

@@ -2,7 +2,7 @@ import XCTest
 @testable import RiverKit
 
 /// Campaign completion, skill rating, achievements, leak detection and
-/// recommendations (§23–34): pure functions over recorded play.
+/// recommendations (§23-34): pure functions over recorded play.
 final class ProgressionTests: XCTestCase {
 
     func testCampaignLadderIsWellFormed() {

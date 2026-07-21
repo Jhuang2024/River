@@ -95,7 +95,7 @@ public enum BlackjackError: Error, Equatable {
 
 /// The complete round state machine. Pure value type: every transition is a
 /// mutating func, fully Codable for save/resume (§15), and driven only by the
-/// shoe's seeded order — never by bankroll, history or streaks (§3).
+/// shoe's seeded order - never by bankroll, history or streaks (§3).
 public struct BlackjackRound: Codable, Hashable, Sendable {
     public let rules: BlackjackRules
     public private(set) var shoe: BlackjackShoe

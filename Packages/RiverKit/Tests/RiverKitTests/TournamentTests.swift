@@ -1,7 +1,7 @@
 import XCTest
 @testable import RiverKit
 
-/// Sit-and-Go state machine (§19–20): structures, blind levels, eliminations,
+/// Sit-and-Go state machine (§19-20): structures, blind levels, eliminations,
 /// placings, prizes and persistence.
 final class TournamentTests: XCTestCase {
 

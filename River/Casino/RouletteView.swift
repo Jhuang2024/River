@@ -494,14 +494,14 @@ struct RouletteView: View {
     private var outsideRow: some View {
         VStack(spacing: 3) {
             HStack(spacing: 3) {
-                outsideCell("1–18") { model.placeOutside(.low) }
+                outsideCell("1-18") { model.placeOutside(.low) }
                 outsideCell("Even") { model.placeOutside(.even) }
                 outsideCell("Red", tint: Theme.danger) { model.placeOutside(.red) }
             }
             HStack(spacing: 3) {
                 outsideCell("Black", tint: Color(white: 0.25)) { model.placeOutside(.black) }
                 outsideCell("Odd") { model.placeOutside(.odd) }
-                outsideCell("19–36") { model.placeOutside(.high) }
+                outsideCell("19-36") { model.placeOutside(.high) }
             }
         }
     }

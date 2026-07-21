@@ -109,8 +109,8 @@ struct LessonView: View {
             }
             if let lastScore {
                 Text(lastScore >= lesson.masteryThreshold
-                     ? "Passed with \(Int((lastScore * 100).rounded()))% — nicely done."
-                     : "\(Int((lastScore * 100).rounded()))% — review the sections above and try again.")
+                     ? "Passed with \(Int((lastScore * 100).rounded()))%: nicely done."
+                     : "\(Int((lastScore * 100).rounded()))%: review the sections above and try again.")
                     .font(Theme.Fonts.caption.weight(.semibold))
                     .foregroundStyle(lastScore >= lesson.masteryThreshold ? Theme.positive : Theme.caution)
             }

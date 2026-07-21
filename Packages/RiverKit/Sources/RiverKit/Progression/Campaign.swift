@@ -85,7 +85,7 @@ public struct CampaignProgress: Codable, Hashable, Sendable {
 }
 
 /// The seven-tier ladder (§23) and its boss characters (§25). Bosses are
-/// strong or unusual — never cheating.
+/// strong or unusual - never cheating.
 public enum CampaignLibrary {
 
     public static let bossHandsRequired = 20
@@ -107,7 +107,7 @@ public enum CampaignLibrary {
                 .looseAggressive(name: "Bobby", symbolName: "bicycle", difficulty: .beginner)
             ],
             bossName: "The Collector",
-            bossDescription: "Never folds a pair, never believes your story. Bluffs die here — value bets feast.",
+            bossDescription: "Never folds a pair, never believes your story. Bluffs die here: value bets feast.",
             bossLineup: [
                 .callingStation(name: "The Collector", symbolName: "archivebox.fill", difficulty: .intermediate),
                 .callingStation(name: "Peppa", symbolName: "teddybear.fill", difficulty: .beginner),
@@ -129,7 +129,7 @@ public enum CampaignLibrary {
                 .callingStation(name: "Milo", symbolName: "gamecontroller.fill", difficulty: .beginner)
             ],
             bossName: "The Wall",
-            bossDescription: "Folds, folds, folds — then appears with the nuts. Steal small pots; believe big bets.",
+            bossDescription: "Folds, folds, folds: then appears with the nuts. Steal small pots; believe big bets.",
             bossLineup: [
                 .nit(name: "The Wall", symbolName: "square.stack.3d.up.fill", difficulty: .advanced),
                 .nit(name: "Priya", symbolName: "book.fill", difficulty: .intermediate),
@@ -145,7 +145,7 @@ public enum CampaignLibrary {
             difficulty: .intermediate,
             lineup: BotProfile.defaultLineup(difficulty: .intermediate),
             bossName: "The Flood",
-            bossDescription: "Pressure on every street. Your bluff catchers will be tested — bring discipline.",
+            bossDescription: "Pressure on every street. Your bluff catchers will be tested: bring discipline.",
             bossLineup: [
                 .maniac(name: "The Flood", symbolName: "water.waves", difficulty: .advanced),
                 .looseAggressive(name: "Dana", symbolName: "bolt.fill", difficulty: .intermediate),

@@ -121,8 +121,16 @@ struct ProfileView: View {
                     }
                 }
 
+                Section("Help") {
+                    NavigationLink {
+                        GlossaryView()
+                    } label: {
+                        Label("Glossary: every term explained", systemImage: "book.closed")
+                    }
+                }
+
                 Section("About") {
-                    LabeledContent("Chips", value: "Fictional — never purchasable")
+                    LabeledContent("Chips", value: "Fictional: never purchasable")
                     LabeledContent("Data", value: "Stays on this device")
                     LabeledContent("Fairness", value: "Seeded shuffle, no rigging")
                     Text("The same deck seed and actions always reproduce the same hand. Cards are never altered for drama or progression.")

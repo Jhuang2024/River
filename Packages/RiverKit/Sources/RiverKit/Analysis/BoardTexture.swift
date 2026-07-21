@@ -1,7 +1,7 @@
 import Foundation
 
 /// Compact board-texture classification for assistance overlays (§9).
-/// Pure derived information — never affects engine behaviour.
+/// Pure derived information - never affects engine behaviour.
 public enum BoardTexture {
 
     public struct Classification: Equatable, Sendable {

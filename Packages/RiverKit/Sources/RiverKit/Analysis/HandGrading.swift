@@ -1,6 +1,6 @@
 import Foundation
 
-/// Result-independent decision grades (§33–34).
+/// Result-independent decision grades (§33-34).
 public enum DecisionGrade: String, Codable, Hashable, Sendable, CaseIterable {
     case blunder
     case significantMistake

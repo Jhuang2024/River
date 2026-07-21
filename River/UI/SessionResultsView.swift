@@ -195,13 +195,13 @@ struct SessionResultsView: View {
                 .foregroundStyle(Theme.textSecondary)
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 statCell("Hands won", "\(stats.handsWon)/\(stats.handsPlayed)")
-                statCell("VPIP", String(format: "%.0f%%", stats.vpipPercent))
-                statCell("PFR", String(format: "%.0f%%", stats.pfrPercent))
+                statCell("Pots entered", String(format: "%.0f%%", stats.vpipPercent))
+                statCell("Raised first", String(format: "%.0f%%", stats.pfrPercent))
                 statCell("Showdowns", "\(stats.showdownsWon)/\(stats.showdownsSeen)")
                 statCell("Biggest pot", "\(stats.biggestPotWon)")
                 statCell("Net", "\(stats.netChips)")
             }
-            Text("Small sample — treat these as a snapshot, not a verdict.")
+            Text("Small sample: treat these as a snapshot, not a verdict. Any unfamiliar term is explained in the Glossary (pause menu or Profile tab).")
                 .font(.system(size: 11, design: .rounded))
                 .foregroundStyle(Theme.textSecondary)
         }

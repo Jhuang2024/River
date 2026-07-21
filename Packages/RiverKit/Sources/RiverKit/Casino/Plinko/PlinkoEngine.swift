@@ -31,7 +31,7 @@ public enum PlinkoRisk: String, Codable, Hashable, Sendable, CaseIterable, Ident
 
 /// Versioned multiplier tables (§4). Symmetric, slot count = rows + 1, and
 /// every table's expected value sits just under 1.0 (a small, disclosed
-/// house edge) — validation enforces all of it.
+/// house edge) - validation enforces all of it.
 public enum PlinkoTables {
     public static let configVersion = 1
 

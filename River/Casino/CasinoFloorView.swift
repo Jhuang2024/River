@@ -113,7 +113,7 @@ struct CasinoFloorView: View {
                        color: stats.net >= 0 ? Theme.positive : Theme.danger)
             }
             Divider().overlay(Theme.separator)
-            Text("Strategy games (Poker, Blackjack) reward decisions — Blackjack decision accuracy: \(blackjack.bjDecisions > 0 ? "\(Int((blackjack.bjDecisionAccuracy * 100).rounded()))%" : "no data").")
+            Text("Poker and Blackjack reward good decisions. Your Blackjack decision accuracy so far: \(blackjack.bjDecisions > 0 ? "\(Int((blackjack.bjDecisionAccuracy * 100).rounded()))%" : "no data yet").")
                 .font(Theme.Fonts.caption)
                 .foregroundStyle(Theme.textSecondary)
             Text("Roulette and Plinko are pure chance: no play pattern, streak or system improves their odds.")
@@ -187,6 +187,9 @@ struct CasinoFloorView: View {
             }
             NavigationLink(value: "casino-settings") {
                 linkRow("Bankroll, rules & safeguards", symbol: "slider.horizontal.3")
+            }
+            NavigationLink(value: "glossary") {
+                linkRow("Glossary: what the words mean", symbol: "book.closed")
             }
         }
     }
@@ -408,7 +411,7 @@ struct CountingTrainerView: View {
             Theme.backgroundGradient.ignoresSafeArea()
             ScrollView {
                 VStack(spacing: Theme.Spacing.l) {
-                    Text("Hi-Lo: 2–6 count +1, 7–9 count 0, 10–A count −1. True count = running count ÷ decks remaining. Educational only — the dealer never reacts to your count.")
+                    Text("Hi-Lo counting: cards 2-6 count +1, cards 7-9 count 0, tens and aces count -1. Keep a running total as cards appear. Educational only: the dealer never reacts to your count.")
                         .font(Theme.Fonts.caption)
                         .foregroundStyle(Theme.textSecondary)
                     drillCard
@@ -445,8 +448,8 @@ struct CountingTrainerView: View {
                         drillResult = (answer == drill.correctRunningCount)
                     }
                     if let result = drillResult {
-                        Text(result ? "Correct — the count is \(drill.correctRunningCount)."
-                                    : "Not quite — the count is \(drill.correctRunningCount).")
+                        Text(result ? "Correct: the count is \(drill.correctRunningCount)."
+                                    : "Not quite: the count is \(drill.correctRunningCount).")
                             .font(Theme.Fonts.caption.weight(.semibold))
                             .foregroundStyle(result ? Theme.positive : Theme.danger)
                     }
@@ -496,12 +499,12 @@ struct CountingTrainerView: View {
                     }
                 }
                 if shoeMistakes > 0 {
-                    Text("\(shoeMistakes) slip\(shoeMistakes == 1 ? "" : "s") so far — the count was corrected for you.")
+                    Text("\(shoeMistakes) slip\(shoeMistakes == 1 ? "" : "s") so far: the count was corrected for you.")
                         .font(Theme.Fonts.caption)
                         .foregroundStyle(Theme.caution)
                 }
             } else if shoeFinished {
-                Text(shoeMistakes == 0 ? "Perfect shoe — every burst counted correctly."
+                Text(shoeMistakes == 0 ? "Perfect shoe: every burst counted correctly."
                                        : "Shoe complete with \(shoeMistakes) slip\(shoeMistakes == 1 ? "" : "s"). Run it again for a clean count.")
                     .font(Theme.Fonts.caption.weight(.semibold))
                     .foregroundStyle(shoeMistakes == 0 ? Theme.positive : Theme.caution)

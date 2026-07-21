@@ -120,7 +120,7 @@ public struct HandReplayer {
                 case .showedHand(let seat, let cards, let valueDescription):
                     seats[seat].holeCards = cards
                     seats[seat].showedCards = true
-                    caption = "\(name(seat)) shows \(cards.map { $0.description }.joined(separator: " ")) — \(valueDescription)"
+                    caption = "\(name(seat)) shows \(cards.map { $0.description }.joined(separator: " ")): \(valueDescription)"
                     lastActor = seat
                 case .wonPot(let seat, let amount, let potIndex, let handDescription):
                     seats[seat].stack += amount

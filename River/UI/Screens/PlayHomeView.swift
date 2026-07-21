@@ -19,6 +19,7 @@ struct PlayHomeView: View {
                     VStack(spacing: Theme.Spacing.xl) {
                         wordmark
                         primaryCard
+                        beginnerCard
                         recentModule
                         Text("Fictional chips only · Offline · Private")
                             .font(Theme.Fonts.caption)
@@ -55,6 +56,8 @@ struct PlayHomeView: View {
                     CountingTrainerView()
                 case "casino-settings", "blackjack-settings", "roulette-settings", "plinko-settings":
                     CasinoSettingsView()
+                case "glossary":
+                    GlossaryView()
                 default:
                     EmptyView()
                 }
@@ -83,40 +86,63 @@ struct PlayHomeView: View {
     private var primaryCard: some View {
         VStack(spacing: Theme.Spacing.m) {
             if game.hasSavedTournament {
-                ActionButton(title: "Continue tournament", role: .primary, accent: accent, identifier: "play.continueTournament") {
+                ActionButton(title: "Continue tournament", subtitle: "Pick up where you left off",
+                             role: .primary, accent: accent, identifier: "play.continueTournament") {
                     game.resumeSavedTournament()
                 }
             }
             if game.hasSavedSession {
-                ActionButton(title: "Continue session", role: game.hasSavedTournament ? .secondary : .primary,
+                ActionButton(title: "Continue playing", subtitle: "Return to your saved poker table",
+                             role: game.hasSavedTournament ? .secondary : .primary,
                              accent: accent, identifier: "play.continue") {
                     game.resumeSavedSession()
                 }
-                ActionButton(title: "New cash game", role: .secondary, accent: accent, identifier: "play.quickCash") {
+                ActionButton(title: "New poker table", subtitle: "Start a fresh game",
+                             role: .secondary, accent: accent, identifier: "play.quickCash") {
                     path.append(Route.setup)
                 }
             } else {
-                ActionButton(title: "Quick cash game",
+                ActionButton(title: "Play poker", subtitle: "Sit down at a table and go",
                              role: game.hasSavedTournament ? .secondary : .primary,
                              accent: accent, identifier: "play.quickCash") {
                     path.append(Route.setup)
                 }
             }
-            ActionButton(title: "Sit & Go tournament", role: .secondary, accent: accent, identifier: "play.tournament") {
+            ActionButton(title: "Tournament", subtitle: "6 players, last one standing wins",
+                         role: .secondary, accent: accent, identifier: "play.tournament") {
                 path.append(Route.tournamentSetup)
             }
-            ActionButton(title: "Stakes Ladder", role: .secondary, accent: accent, identifier: "play.campaign") {
+            ActionButton(title: "Stakes Ladder", subtitle: "A campaign: climb 7 tiers by playing well",
+                         role: .secondary, accent: accent, identifier: "play.campaign") {
                 path.append("campaign")
             }
-            ActionButton(title: "Casino Floor", role: .quiet, accent: accent, identifier: "play.casino") {
+            ActionButton(title: "Casino Floor", subtitle: "Blackjack, Roulette and Plinko",
+                         role: .quiet, accent: accent, identifier: "play.casino") {
                 path.append("casino")
             }
-            Text("Six-max no-limit hold'em against adaptive AI opponents.\nCash games, tournaments and a decision-graded campaign.")
-                .font(Theme.Fonts.caption)
-                .foregroundStyle(Theme.textTertiary)
-                .multilineTextAlignment(.center)
         }
         .padding(Theme.Spacing.l)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.sheet).fill(Theme.backgroundElevated.opacity(0.6)))
+    }
+
+    /// First-timers get a clear path: lessons and a plain-words glossary.
+    private var beginnerCard: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.s) {
+            Text("NEW TO POKER?").sectionHeader()
+            Text("Start with the Foundations lessons in the Train tab. They explain everything from zero, and you can look up any word in the glossary at any time.")
+                .font(Theme.Fonts.caption)
+                .foregroundStyle(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Button {
+                path.append("glossary")
+            } label: {
+                Label("Open the glossary", systemImage: "book.closed")
+                    .font(Theme.Fonts.secondaryAction)
+                    .foregroundStyle(accent)
+            }
+        }
+        .padding(Theme.Spacing.l)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.sheet).fill(Theme.backgroundElevated.opacity(0.6)))
     }
 
@@ -129,11 +155,11 @@ struct PlayHomeView: View {
             VStack(alignment: .leading, spacing: Theme.Spacing.m) {
                 Text("RECENT FORM").sectionHeader()
                 HStack(spacing: Theme.Spacing.xl) {
-                    metric("Hands", "\(stats.handsPlayed)")
-                    metric("Net", stats.netChips >= 0 ? "+\(stats.netChips)" : "\(stats.netChips)",
+                    metric("Hands played", "\(stats.handsPlayed)")
+                    metric("Chips won/lost", stats.netChips >= 0 ? "+\(stats.netChips)" : "\(stats.netChips)",
                            color: stats.netChips >= 0 ? Theme.positive : Theme.danger)
-                    metric("VPIP", String(format: "%.0f%%", stats.vpipPercent))
-                    metric("Won", "\(stats.handsWon)")
+                    metric("Pots entered", String(format: "%.0f%%", stats.vpipPercent))
+                    metric("Hands won", "\(stats.handsWon)")
                 }
                 Text(suggestion(stats: stats))
                     .font(Theme.Fonts.caption)
@@ -163,10 +189,10 @@ struct PlayHomeView: View {
             return "Play more hands to build a meaningful sample."
         }
         if stats.vpipPercent > 35 {
-            return "You're entering \(Int(stats.vpipPercent))% of pots — tightening up preflop usually pays."
+            return "You're entering \(Int(stats.vpipPercent))% of pots: tightening up preflop usually pays."
         }
         if stats.pfrPercent < stats.vpipPercent / 2 {
-            return "You call preflop far more than you raise — consider raising your playable hands."
+            return "You call preflop far more than you raise: consider raising your playable hands."
         }
         return "Solid recent play. Review your biggest pots to keep improving."
     }

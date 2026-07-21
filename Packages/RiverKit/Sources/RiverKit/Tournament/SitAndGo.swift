@@ -14,7 +14,7 @@ public struct BlindLevel: Codable, Hashable, Sendable {
     }
 }
 
-/// Configurable tournament structure (§19–20). Values live in configuration,
+/// Configurable tournament structure (§19-20). Values live in configuration,
 /// never in engine code.
 public struct TournamentStructure: Codable, Hashable, Sendable, Identifiable {
     public let id: String

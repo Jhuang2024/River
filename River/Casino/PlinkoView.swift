@@ -4,7 +4,7 @@ import RiverKit
 
 /// SpriteKit board (§4). The scene ONLY animates: every ball's slot and
 /// payout are decided by the seeded engine before the ball exists, and the
-/// ball follows that exact path — frame rate cannot change any result (§3).
+/// ball follows that exact path - frame rate cannot change any result (§3).
 final class PlinkoScene: SKScene {
     private var rows: PlinkoRows = .twelve
     private var pegRadius: CGFloat = 2.6

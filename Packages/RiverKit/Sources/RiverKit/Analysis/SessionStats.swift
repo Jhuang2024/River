@@ -6,7 +6,7 @@ import Foundation
 public struct SessionStats: Equatable, Sendable {
     public let handsPlayed: Int
     public let handsWon: Int
-    /// Voluntarily put money in pot (excluding blind posts) — count and %.
+    /// Voluntarily put money in pot (excluding blind posts) - count and %.
     public let vpipCount: Int
     /// Preflop raise count.
     public let pfrCount: Int

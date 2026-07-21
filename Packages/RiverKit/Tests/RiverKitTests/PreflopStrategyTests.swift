@@ -133,7 +133,7 @@ final class PreflopStrategyTests: XCTestCase {
 
     func testShortStackShovesInsteadOfMiniRaising() throws {
         // 20-chip stacks at 1/2 = 10 BB effective: push/fold mode. Button
-        // holds A5s — a standard shove.
+        // holds A5s - a standard shove.
         let stacks = Array(repeating: 20, count: 6)
         let hand = makeHand(holes: [0: [c(.ace, .spades), c(.five, .spades)]], stacks: stacks)
         try hand.apply(.fold, by: 3)
@@ -156,7 +156,7 @@ final class PreflopStrategyTests: XCTestCase {
 
     func testDeepAndShortStrategiesDiffer() throws {
         // The same speculative button hand min-opens deep but is a shove/fold
-        // decision short — sizes must differ drastically (§26–27).
+        // decision short - sizes must differ drastically (§26-27).
         let hole = [c(.ace, .spades), c(.five, .spades)]
         let deep = makeHand(holes: [0: hole])
         try deep.apply(.fold, by: 3)

@@ -63,7 +63,7 @@ public struct DrillQuestion: Hashable, Sendable {
 }
 
 /// Seeded, validated scenario generation (§16) built on the real engine,
-/// strategy and analysis stack — never on parallel mock logic.
+/// strategy and analysis stack - never on parallel mock logic.
 public enum DrillEngine {
 
     /// Generates the questions for a plan. Deterministic per seed.
@@ -279,7 +279,7 @@ public enum DrillEngine {
         }
         var list = Array(options).sorted()
         rng.shuffle(&list)
-        let explanation = "Pairs have 6 combos, suited hands 4, offsuit hands 12. Each visible card removes the combinations containing it — here the answer is \(truth)."
+        let explanation = "Pairs have 6 combos, suited hands 4, offsuit hands 12. Each visible card removes the combinations containing it: here the answer is \(truth)."
         let choices = list.prefix(4).map { value in
             DrillChoice(label: "\(value)", grade: value == truth ? .correct : .mistake, explanation: explanation)
         }

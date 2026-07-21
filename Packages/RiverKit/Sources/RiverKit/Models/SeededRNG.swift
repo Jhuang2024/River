@@ -45,7 +45,7 @@ public struct SeededRNG: Codable, Equatable, Sendable {
         return Double(nextUInt64() >> 11) * (1.0 / 9_007_199_254_740_992.0)
     }
 
-    /// Deterministic Fisher–Yates shuffle.
+    /// Deterministic Fisher-Yates shuffle.
     public mutating func shuffle<T>(_ array: inout [T]) {
         guard array.count > 1 else { return }
         var i = array.count - 1

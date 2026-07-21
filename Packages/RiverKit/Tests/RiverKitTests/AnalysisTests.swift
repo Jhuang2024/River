@@ -1,7 +1,7 @@
 import XCTest
 @testable import RiverKit
 
-/// Made-hand, draw, board-feature, grading and explanation tests (§11–13, §32–36).
+/// Made-hand, draw, board-feature, grading and explanation tests (§11-13, §32-36).
 final class AnalysisTests: XCTestCase {
 
     // MARK: - Made-hand classification (§13)
@@ -61,7 +61,7 @@ final class AnalysisTests: XCTestCase {
     }
 
     func testDoubleGutshotVersusOpenEnder() {
-        // 9-8 on J-7-5: both a 6 (5-9) and a T (7-J) complete — double gutshot.
+        // 9-8 on J-7-5: both a 6 (5-9) and a T (7-J) complete - double gutshot.
         let doubleGut = DrawAnalyzer.analyze(
             hole: [c(.nine, .diamonds), c(.eight, .diamonds)],
             board: [c(.jack, .clubs), c(.seven, .hearts), c(.five, .spades)]
@@ -70,7 +70,7 @@ final class AnalysisTests: XCTestCase {
         XCTAssertFalse(doubleGut.openEndedStraightDraw)
         XCTAssertTrue(doubleGut.isStrongDraw)
 
-        // 9-8 on 7-6-K: 5 or T completes a four-card run — open-ended.
+        // 9-8 on 7-6-K: 5 or T completes a four-card run - open-ended.
         let openEnder = DrawAnalyzer.analyze(
             hole: [c(.nine, .diamonds), c(.eight, .diamonds)],
             board: [c(.seven, .clubs), c(.six, .hearts), c(.king, .spades)]
@@ -78,7 +78,7 @@ final class AnalysisTests: XCTestCase {
         XCTAssertTrue(openEnder.openEndedStraightDraw)
         XCTAssertFalse(openEnder.doubleGutshot)
 
-        // A-K on Q-J-4: only a ten completes — gutshot.
+        // A-K on Q-J-4: only a ten completes - gutshot.
         let gutshot = DrawAnalyzer.analyze(
             hole: [c(.ace, .diamonds), c(.king, .diamonds)],
             board: [c(.queen, .clubs), c(.jack, .hearts), c(.four, .spades)]
@@ -104,7 +104,7 @@ final class AnalysisTests: XCTestCase {
         XCTAssertEqual(river.dynamism, 0, accuracy: 1e-9)
     }
 
-    // MARK: - Grading semantics (§33–34)
+    // MARK: - Grading semantics (§33-34)
 
     /// Builds a heads-up river spot with a bet facing the hero.
     private func riverSpot(heroCards: [Card], villainCards: [Card], board: [Card], villainBet: Int) throws -> BotObservation {
@@ -161,7 +161,7 @@ final class AnalysisTests: XCTestCase {
         )
     }
 
-    /// Result-independence (§33): grading uses only the observation — the
+    /// Result-independence (§33): grading uses only the observation - the
     /// villain's actual cards never enter, so two different villain holdings
     /// with identical public action produce identical grades.
     func testGradingIsResultIndependent() throws {

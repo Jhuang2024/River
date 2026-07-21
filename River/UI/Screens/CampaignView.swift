@@ -2,7 +2,7 @@ import SwiftUI
 import RiverKit
 
 /// The Stakes Ladder (§23): seven tiers, each closed by a boss table.
-/// Completion depends on decision quality over a required volume — luck can't
+/// Completion depends on decision quality over a required volume - luck can't
 /// buy a tier and one bad river can't take it away.
 struct CampaignView: View {
     @EnvironmentObject var game: GameViewModel
@@ -91,7 +91,7 @@ struct CampaignView: View {
                     .foregroundStyle(qualityOK ? Theme.positive : Theme.caution)
             }
             if !qualityOK {
-                Text("Too many severe mistakes — the rate falls as you play more clean hands. Review your graded hands to see what went wrong.")
+                Text("Too many severe mistakes: the rate falls as you play more clean hands. Review your graded hands to see what went wrong.")
                     .font(Theme.Fonts.caption)
                     .foregroundStyle(Theme.caution)
                     .fixedSize(horizontal: false, vertical: true)
@@ -120,7 +120,7 @@ struct CampaignView: View {
                 }
                 .padding(.top, 4)
             } else {
-                Text("Boss table unlocks after \(tier.handsRequired) clean hands: \(tier.bossName) — \(tier.bossDescription)")
+                Text("Boss table unlocks after \(tier.handsRequired) clean hands: \(tier.bossName): \(tier.bossDescription)")
                     .font(Theme.Fonts.caption)
                     .foregroundStyle(Theme.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)

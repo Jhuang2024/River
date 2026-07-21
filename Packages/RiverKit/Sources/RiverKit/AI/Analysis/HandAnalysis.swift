@@ -1,6 +1,6 @@
 import Foundation
 
-/// Strategic made-hand categories (§13) — richer than the formal rank.
+/// Strategic made-hand categories (§13) - richer than the formal rank.
 public enum MadeHandClass: Int, Codable, Comparable, Sendable, CaseIterable {
     case air = 0
     case aceHigh = 1
@@ -62,7 +62,7 @@ public struct MadeHandAnalysis: Equatable, Sendable {
 public enum RelativeStrength {
 
     /// Returns (fractionBeaten, fractionTied) versus all combos not blocked
-    /// by dead cards. Exact enumeration — no simulation.
+    /// by dead cards. Exact enumeration - no simulation.
     public static func versusAllCombos(hole: [Card], board: [Card], extraDead: Set<Card> = []) -> (beaten: Double, tied: Double) {
         precondition(board.count >= 3, "relative strength needs a board")
         let heroValue = HandEvaluator.evaluate(hole: hole, board: board)
@@ -327,7 +327,7 @@ public enum DrawAnalyzer {
 
 extension BoardTexture {
 
-    /// Numeric board features (§11) — labels are summaries, these drive AI.
+    /// Numeric board features (§11) - labels are summaries, these drive AI.
     public struct Features: Equatable, Sendable {
         /// 0 = unpaired, 1 = one pair, 2 = double-paired/trips+.
         public let pairedness: Int

@@ -1,7 +1,7 @@
 import Foundation
 
-/// Probabilistic per-opponent range estimation (§14–15), built purely from
-/// public events — the tracker is a deterministic function of the visible
+/// Probabilistic per-opponent range estimation (§14-15), built purely from
+/// public events - the tracker is a deterministic function of the visible
 /// history, so bot decisions using it stay reproducible and cheat-free.
 ///
 /// Update model: posteriorWeight = priorWeight × actionLikelihood, with a

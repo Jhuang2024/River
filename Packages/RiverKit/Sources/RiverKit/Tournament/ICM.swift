@@ -1,6 +1,6 @@
 import Foundation
 
-/// Exact Malmuth–Harville ICM for up to six players (§21). Isolated from all
+/// Exact Malmuth-Harville ICM for up to six players (§21). Isolated from all
 /// cash-game logic; cash games never consult it (§28 of the AI spec).
 public enum ICM {
 
@@ -15,7 +15,7 @@ public enum ICM {
         guard !players.isEmpty, !payouts.isEmpty else { return result }
         precondition(players.count <= 8, "exact ICM is exponential; bounded to small fields")
 
-        // P(finishing order prefix) via Malmuth–Harville: the chance a player
+        // P(finishing order prefix) via Malmuth-Harville: the chance a player
         // finishes next among the remaining field is proportional to stack.
         func recurse(remaining: [Int], place: Int, probability: Double) {
             guard place < payouts.count else { return }
@@ -64,7 +64,7 @@ public enum ICM {
         guard winEquity > loseEquity else { return 0 }
 
         // Chip-EV breakeven is risk/(2*risk) = 50% of the matched chips; the
-        // $EV breakeven is where p*win + (1-p)*lose equals folding equity —
+        // $EV breakeven is where p*win + (1-p)*lose equals folding equity -
         // approximate the premium as the shift of the breakeven point.
         let foldEquity = equities(stacks: stacks, payouts: payouts)[heroIndex]
         let breakEven = (foldEquity - loseEquity) / (winEquity - loseEquity)

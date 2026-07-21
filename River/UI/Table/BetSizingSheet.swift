@@ -121,7 +121,7 @@ struct BetSizingSheet: View {
                 telemetry("Pot", "\(potPercent)%")
                 telemetry("Behind", "\(max(0, myStack - chipsAdded))")
                 Spacer()
-                Text("\(options.minTo)–\(options.maxTo)")
+                Text("\(options.minTo)-\(options.maxTo)")
                     .font(Theme.Fonts.telemetry)
                     .foregroundStyle(Theme.textTertiary)
             }

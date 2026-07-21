@@ -84,7 +84,7 @@ func playRandomHand(_ hand: PokerHand, rng: inout SeededRNG, maxActions: Int = 5
         taken.append((seat, action))
         guardCount += 1
         if guardCount > maxActions {
-            XCTFail("hand exceeded \(maxActions) actions — possible deadlock")
+            XCTFail("hand exceeded \(maxActions) actions: possible deadlock")
             break
         }
     }

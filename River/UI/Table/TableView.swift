@@ -1,7 +1,7 @@
 import SwiftUI
 import RiverKit
 
-/// The active poker table (§6): portrait, three regions — thin status bar,
+/// The active poker table (§6): portrait, three regions - thin status bar,
 /// table with five AI seats, hero region with cards and controls. Full-screen,
 /// outside the tab hierarchy.
 struct TableView: View {
@@ -29,7 +29,7 @@ struct TableView: View {
     private var deckStyle: DeckStyle { settingsStore.settings.deckStyle }
 
     /// Seat anchors (§7): hero bottom centre; opponents clockwise from the
-    /// hero's left — left middle, upper left, top centre, upper right,
+    /// hero's left - left middle, upper left, top centre, upper right,
     /// right middle. Slightly asymmetric beats a cramped perfect oval.
     private let seatAnchors: [CGPoint] = [
         CGPoint(x: 0.50, y: 0.94),   // hero (badge only; cards live below)
@@ -525,6 +525,13 @@ struct TableView: View {
                     Toggle("Hand strength", isOn: $settingsStore.settings.showHandStrength)
                     Toggle("Pot odds", isOn: $settingsStore.settings.showPotOdds)
                     Toggle("Hints", isOn: $settingsStore.settings.allowRecommendations)
+                }
+                Section("Help") {
+                    NavigationLink {
+                        GlossaryView()
+                    } label: {
+                        Label("Glossary: what the words mean", systemImage: "book.closed")
+                    }
                 }
             }
             .navigationTitle("Paused")

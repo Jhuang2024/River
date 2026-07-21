@@ -75,7 +75,7 @@ struct TournamentSetupView: View {
                         .background(RoundedRectangle(cornerRadius: Theme.Radius.card).fill(Theme.backgroundElevated))
                     }
 
-                    Text("Blinds rise every \(structure.handsPerLevel) hands. Short stacks change correct strategy — the push-fold lessons in the Tournament academy apply directly here.")
+                    Text("Blinds rise every \(structure.handsPerLevel) hands. Short stacks change correct strategy: the push-fold lessons in the Tournament academy apply directly here.")
                         .font(Theme.Fonts.caption)
                         .foregroundStyle(Theme.textSecondary)
 

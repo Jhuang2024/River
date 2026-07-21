@@ -1,7 +1,7 @@
 import Foundation
 
 /// One resolved spin with per-bet payouts (§5, §12). The winning pocket is
-/// drawn from the seeded RNG alone — the animation, bankroll, and history
+/// drawn from the seeded RNG alone - the animation, bankroll, and history
 /// have no influence (§3).
 public struct RouletteSpinResult: Codable, Hashable, Sendable {
     public let seed: UInt64

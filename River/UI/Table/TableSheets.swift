@@ -60,13 +60,13 @@ enum ActionHistoryBuilder {
                 }
             case .dealtBoard(let street, let cards):
                 flush()
-                currentTitle = "\(street.name) — \(cards.map { $0.description }.joined(separator: " "))"
+                currentTitle = "\(street.name): \(cards.map { $0.description }.joined(separator: " "))"
             case .refundedUncalledBet(let seat, let amount):
                 add("\(name(seat)) takes back \(amount)")
             case .wonWithoutShowdown(let seat, let amount):
                 add("\(name(seat)) wins \(amount)")
             case .showedHand(let seat, let cards, let value):
-                add("\(name(seat)) shows \(cards.map { $0.description }.joined(separator: " ")) — \(value)")
+                add("\(name(seat)) shows \(cards.map { $0.description }.joined(separator: " ")): \(value)")
             case .wonPot(let seat, let amount, let potIndex, _):
                 add("\(name(seat)) wins \(amount)\(potIndex > 0 ? " (side pot)" : "")")
             default:
@@ -137,8 +137,8 @@ struct HintSheet: View {
         case .fold: return "Fold"
         case .check: return "Check"
         case .call: return "Call"
-        case .bet: return "Bet — around \(advice.toAmount ?? 0)"
-        case .raise: return "Raise — to about \(advice.toAmount ?? 0)"
+        case .bet: return "Bet: around \(advice.toAmount ?? 0)"
+        case .raise: return "Raise: to about \(advice.toAmount ?? 0)"
         }
     }
 
@@ -168,7 +168,7 @@ struct HintSheet: View {
                     statPill("Needs", "\(Int((advice.potOdds * 100).rounded()))%")
                 }
             }
-            Text("Estimates come from simulation against unknown hands — a guide, not gospel.")
+            Text("Estimates come from simulation against unknown hands: a guide, not gospel.")
                 .font(Theme.Fonts.caption)
                 .foregroundStyle(Theme.textTertiary)
             Spacer(minLength: 0)
@@ -207,7 +207,7 @@ struct HintSheet: View {
 
 // MARK: - Opponent read (§19)
 
-/// Only observed or publicly-known information — never hidden AI parameters.
+/// Only observed or publicly-known information - never hidden AI parameters.
 struct OpponentRead: Identifiable, Equatable {
     let id: Int
     let name: String
@@ -224,7 +224,7 @@ struct OpponentReadSheet: View {
     let read: OpponentRead
 
     private var confidence: String {
-        if read.handsObserved < 15 { return "Low — small sample" }
+        if read.handsObserved < 15 { return "Low: small sample" }
         if read.handsObserved < 50 { return "Moderate" }
         return "Good"
     }
@@ -253,8 +253,8 @@ struct OpponentReadSheet: View {
                 .foregroundStyle(Theme.textPrimary.opacity(0.85))
             if read.handsObserved > 0 {
                 HStack(spacing: Theme.Spacing.xl) {
-                    metric("VPIP", String(format: "%.0f%%", read.vpipPercent))
-                    metric("PFR", String(format: "%.0f%%", read.pfrPercent))
+                    metric("Plays hands", String(format: "%.0f%%", read.vpipPercent))
+                    metric("Raises first", String(format: "%.0f%%", read.pfrPercent))
                     metric("Showdowns", "\(read.showdownsSeen)")
                 }
             }
@@ -302,7 +302,7 @@ struct PotBreakdownSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.l) {
-            Text("Pot — \(total)")
+            Text("Pot: \(total)")
                 .font(Theme.Fonts.screenTitle)
                 .monospacedDigit()
                 .foregroundStyle(Theme.textPrimary)

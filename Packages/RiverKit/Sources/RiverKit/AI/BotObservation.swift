@@ -35,7 +35,7 @@ public struct BotObservation: Equatable, Sendable {
     /// (§29). Populated by the session layer; empty when unavailable.
     public var observedTendencies: [Int: SeatTendencies] = [:]
     /// Public tournament information (players remaining, payouts, stacks).
-    /// nil in cash games — ICM never leaks into cash decisions.
+    /// nil in cash games - ICM never leaks into cash decisions.
     public var tournamentContext: TournamentContext? = nil
 
     /// Copy with tendencies attached (observations are otherwise immutable).

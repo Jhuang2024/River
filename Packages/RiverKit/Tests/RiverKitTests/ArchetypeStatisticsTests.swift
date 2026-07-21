@@ -2,7 +2,7 @@ import XCTest
 @testable import RiverKit
 
 /// Deterministic simulation-based validation of archetype behaviour (§42).
-/// Wide expected bands, not fake precision — the point is catching
+/// Wide expected bands, not fake precision - the point is catching
 /// pathologies (a nit that plays half its hands, a station that raises).
 final class ArchetypeStatisticsTests: XCTestCase {
 

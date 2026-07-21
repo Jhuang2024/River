@@ -1,11 +1,11 @@
 import Foundation
 
-/// Result-independent post-hand analysis (§32–36).
+/// Result-independent post-hand analysis (§32-36).
 ///
 /// The analyzer re-simulates the recorded hand from its seed and action
 /// sequence (the engine is deterministic), pauses at every hero decision,
-/// rebuilds the information legally visible at that moment — including
-/// tracked opponent ranges — and evaluates the same candidate set the AI
+/// rebuilds the information legally visible at that moment - including
+/// tracked opponent ranges - and evaluates the same candidate set the AI
 /// uses, with personality and noise switched off. The output is a pure
 /// function of the stored history, so re-running it later reproduces the
 /// original grades (§47).
@@ -350,7 +350,7 @@ public enum HandAnalyzer {
     }
 }
 
-/// Deterministic local explanation templates (§36) — situation, mathematics,
+/// Deterministic local explanation templates (§36) - situation, mathematics,
 /// range context, recommendation, reason, honesty about closeness. No
 /// language model, no external service.
 enum ExplanationBuilder {
@@ -382,16 +382,16 @@ enum ExplanationBuilder {
         } else if context.madeHand.isVulnerable {
             parts.append("The hand was strong but vulnerable on this board.")
         }
-        // 4–5. Recommendation and reason.
+        // 4-5. Recommendation and reason.
         if isClose {
-            parts.append("The best options were very close — \(recommended) rates marginally best, but \(chosen) is defensible.")
+            parts.append("The best options were very close: \(recommended) rates marginally best, but \(chosen) is defensible.")
         } else if evLossBB < GradingThresholds.strong {
             parts.append("Your \(chosen) matches the best line (\(recommended)).")
         } else {
             parts.append("\(recommended.prefix(1).capitalized)\(recommended.dropFirst()) was preferable; \(chosen) gives up an estimated \(String(format: "%.1f", evLossBB)) big blinds.")
         }
         if confidence == .low {
-            parts.append("Confidence is low — the range model for this spot is uncertain.")
+            parts.append("Confidence is low: the range model for this spot is uncertain.")
         }
         parts.append("Estimates are approximate, judged on the information available at the time.")
         return parts.joined(separator: " ")
@@ -414,7 +414,7 @@ enum ExplanationBuilder {
         if matches {
             parts.append("Your \(chosen) lines up with that range.")
         } else if isClose {
-            parts.append("Your \(chosen) differs, but the hand sits right at the edge of the range — both lines are defensible.")
+            parts.append("Your \(chosen) differs, but the hand sits right at the edge of the range: both lines are defensible.")
         } else {
             parts.append("Your \(chosen) strays from the range for this position and stack depth.")
         }

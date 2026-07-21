@@ -488,7 +488,7 @@ struct BlackjackView: View {
             .background(RoundedRectangle(cornerRadius: Theme.Radius.card).fill(Theme.backgroundElevated.opacity(0.6)))
         }
         if model.assist.showStrategyChart {
-            Text("Chart: stand 17+; stand 13–16 vs 2–6 else hit; 12 stands vs 4–6; double 11 (and 10 vs 2–9, 9 vs 3–6); soft 18 doubles vs 3–6, stands vs 2/7/8, hits vs 9+; always split A,A and 8,8; never split 10,10 or 5,5.")
+            Text("Chart: stand 17+; stand 13-16 vs 2-6 else hit; 12 stands vs 4-6; double 11 (and 10 vs 2-9, 9 vs 3-6); soft 18 doubles vs 3-6, stands vs 2/7/8, hits vs 9+; always split A,A and 8,8; never split 10,10 or 5,5.")
                 .font(Theme.Fonts.caption)
                 .foregroundStyle(Theme.textSecondary)
                 .padding(Theme.Spacing.m)

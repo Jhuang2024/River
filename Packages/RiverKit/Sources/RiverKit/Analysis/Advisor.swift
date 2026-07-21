@@ -75,7 +75,7 @@ public enum Advisor {
         reason += " at \(Int(context.effectiveStackBB)) big blinds, "
         switch decision.action.kind {
         case .fold:
-            reason += "this hand sits outside a disciplined range — folding keeps your chips for better spots."
+            reason += "this hand sits outside a disciplined range: folding keeps your chips for better spots."
         case .check:
             reason += "checking keeps the pot small with a free option."
         case .call:
@@ -85,7 +85,7 @@ public enum Advisor {
                 reason += "calling is reasonable with this hand."
             }
         case .bet, .raise:
-            reason += "this hand is comfortably inside the raising range — take the initiative."
+            reason += "this hand is comfortably inside the raising range: take the initiative."
         }
 
         return Advice(
@@ -138,7 +138,7 @@ public enum Advisor {
         reason += "Your \(context.madeHand.handClass.name) has roughly \(equityPct)% equity against \(opponents) estimated range\(opponents == 1 ? "" : "s"). "
         switch best.candidate.action.kind {
         case .fold:
-            reason += "That falls short of the price — folding saves chips."
+            reason += "That falls short of the price: folding saves chips."
         case .check:
             reason += context.madeHand.fractionBeaten > 0.6
                 ? "Checking controls the pot and invites bluffs."
@@ -155,7 +155,7 @@ public enum Advisor {
             }
         }
         if gapBB < 0.3 {
-            reason += " The alternatives are close — this is not a clear-cut spot."
+            reason += " The alternatives are close: this is not a clear-cut spot."
         }
 
         return Advice(

@@ -206,7 +206,7 @@ struct HandReplayView: View {
                 .kerning(1.2)
                 .foregroundStyle(Theme.textSecondary)
             if heroDecisions.isEmpty {
-                Text("No decisions this hand — you were in the blinds and never had to act.")
+                Text("No decisions this hand: you were in the blinds and never had to act.")
                     .font(.system(size: 12, design: .rounded))
                     .foregroundStyle(Theme.textSecondary)
             }

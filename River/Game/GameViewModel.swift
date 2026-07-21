@@ -109,7 +109,7 @@ final class GameViewModel: ObservableObject {
     private var lastActionText: [Int: String] = [:]
     private var winnings: [Int: Int] = [:]
     /// Observed public tendencies per seat, refreshed at each hand start and
-    /// passed to Advanced/Elite bots for bounded adaptation (§29–30).
+    /// passed to Advanced/Elite bots for bounded adaptation (§29-30).
     private var currentTendencies: [Int: SeatTendencies] = [:]
     /// Street commitments as the table should DISPLAY them. The engine resets
     /// its own street counters the instant a betting round closes; this copy
@@ -661,7 +661,7 @@ final class GameViewModel: ObservableObject {
     func foldProtectionReason() -> String? {
         guard settings.protectStrongHands, let hand, let actions = heroActions else { return nil }
         if actions.canCheck {
-            return "Checking is free — you don't need to fold."
+            return "Checking is free: you don't need to fold."
         }
         let hero = hand.seats[heroSeatIndex]
         if hand.board.count >= 3 {
@@ -670,7 +670,7 @@ final class GameViewModel: ObservableObject {
                 return "You hold \(value.readableDescription.lowercased())."
             }
         } else if PreflopHands.chenScore(for: hero.holeCards) >= 12 {
-            return "You hold \(PreflopHands.label(for: hero.holeCards)) — a premium hand."
+            return "You hold \(PreflopHands.label(for: hero.holeCards)): a premium hand."
         }
         return nil
     }

@@ -2,7 +2,7 @@ import Foundation
 
 /// Basic strategy (§6), derived from the SAME rule configuration the table
 /// uses. Charts are versioned data, not formulas scattered through code, and
-/// they adapt to S17/H17, DAS and surrender availability — one universal
+/// they adapt to S17/H17, DAS and surrender availability - one universal
 /// chart is never applied to incompatible rules.
 public enum BlackjackStrategy {
 
@@ -38,7 +38,7 @@ public enum BlackjackStrategy {
         // 1. Surrender comes first where the chart says so.
         if canSurrender, shouldSurrender(total: total, isSoft: isSoft, isPair: isPair, up: up, rules: rules) {
             return Recommendation(action: .surrender,
-                                  explanation: "This total loses too often against \(upName(up)) — giving up half the bet saves chips long-term.")
+                                  explanation: "This total loses too often against \(upName(up)): giving up half the bet saves chips long-term.")
         }
 
         // 2. Pairs.
@@ -102,7 +102,7 @@ public enum BlackjackStrategy {
     private static func pairExplanation(pairValue: Int, up: Int) -> String {
         switch pairValue {
         case 1: return "Two aces are two chances at 21; one hand of 12 is nearly worthless."
-        case 8: return "Sixteen is the worst total — two eights are far stronger apart."
+        case 8: return "Sixteen is the worst total: two eights are far stronger apart."
         default: return "Splitting turns a mediocre total into two playable hands against \(upName(up))."
         }
     }
@@ -125,7 +125,7 @@ public enum BlackjackStrategy {
             }
             if canDouble && doubleRange.contains(up) {
                 return Recommendation(action: .double,
-                                      explanation: "The ace makes this bust-proof and \(upName(up)) busts often — get more chips in.")
+                                      explanation: "The ace makes this bust-proof and \(upName(up)) busts often: get more chips in.")
             }
             return Recommendation(action: .hit,
                                   explanation: "A soft \(total) can't bust with one card and is too weak to stand.")
@@ -133,7 +133,7 @@ public enum BlackjackStrategy {
             let doubleVs: ClosedRange<Int> = h17 ? 2...6 : 3...6
             if canDouble && doubleVs.contains(up) {
                 return Recommendation(action: .double,
-                                      explanation: "Soft 18 against a weak upcard is a favourite — doubling maximises it.")
+                                      explanation: "Soft 18 against a weak upcard is a favourite: doubling maximises it.")
             }
             if up >= 9 {
                 return Recommendation(action: .hit,
@@ -148,7 +148,7 @@ public enum BlackjackStrategy {
             }
             return Recommendation(action: .stand, explanation: "Nineteen wins as it stands.")
         default:
-            return Recommendation(action: .stand, explanation: "Stand on 20 and 21 — always.")
+            return Recommendation(action: .stand, explanation: "Stand on 20 and 21: always.")
         }
     }
 
@@ -157,7 +157,7 @@ public enum BlackjackStrategy {
     private static func hardDecision(total: Int, up: Int, rules: BlackjackRules, canDouble: Bool) -> Recommendation {
         switch total {
         case ...8:
-            return Recommendation(action: .hit, explanation: "Totals of 8 or less can never bust — always draw.")
+            return Recommendation(action: .hit, explanation: "Totals of 8 or less can never bust: always draw.")
         case 9:
             if canDouble && (3...6).contains(up) {
                 return Recommendation(action: .double,
@@ -167,20 +167,20 @@ public enum BlackjackStrategy {
         case 10:
             if canDouble && (2...9).contains(up) {
                 return Recommendation(action: .double,
-                                      explanation: "Ten beats the dealer's likely total — double while ahead.")
+                                      explanation: "Ten beats the dealer's likely total: double while ahead.")
             }
             return Recommendation(action: .hit, explanation: "Draw toward 20; the dealer's upcard is too strong to double.")
         case 11:
             let doubleVsAce = rules.dealerHitsSoft17
             if canDouble && (up <= 10 || doubleVsAce) {
                 return Recommendation(action: .double,
-                                      explanation: "Eleven is the best doubling total — one card often makes 21.")
+                                      explanation: "Eleven is the best doubling total: one card often makes 21.")
             }
             return Recommendation(action: .hit, explanation: "Eleven always takes a card.")
         case 12:
             if (4...6).contains(up) {
                 return Recommendation(action: .stand,
-                                      explanation: "Only four ten-value ranks bust you, and \(upName(up)) busts often — let the dealer take the risk.")
+                                      explanation: "Only four ten-value ranks bust you, and \(upName(up)) busts often: let the dealer take the risk.")
             }
             return Recommendation(action: .hit, explanation: "Twelve is too weak to stand against \(upName(up)).")
         case 13...16:
@@ -191,7 +191,7 @@ public enum BlackjackStrategy {
             return Recommendation(action: .hit,
                                   explanation: "Against \(upName(up)) the dealer usually makes 17+; standing on \(total) loses more.")
         default:
-            return Recommendation(action: .stand, explanation: "Seventeen and up stands — the bust risk outweighs any gain.")
+            return Recommendation(action: .stand, explanation: "Seventeen and up stands: the bust risk outweighs any gain.")
         }
     }
 

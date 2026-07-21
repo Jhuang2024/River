@@ -23,7 +23,7 @@ public enum RoulettePocket {
 }
 
 /// Wheel variants (§5). The American wheel's extra pocket raises the house
-/// edge — shown, never hidden.
+/// edge - shown, never hidden.
 public enum RouletteWheel: String, Codable, Hashable, Sendable, CaseIterable, Identifiable {
     case european
     case american
@@ -104,8 +104,8 @@ public enum RouletteBetKind: String, Codable, Hashable, Sendable, CaseIterable {
         case .black: return "Black"
         case .odd: return "Odd"
         case .even: return "Even"
-        case .low: return "Low 1–18"
-        case .high: return "High 19–36"
+        case .low: return "Low 1-18"
+        case .high: return "High 19-36"
         }
     }
 }

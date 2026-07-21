@@ -2,7 +2,7 @@ import XCTest
 @testable import RiverKit
 
 /// Shared fairness architecture (§3, §13): outcomes are functions of seeds
-/// alone — bankroll, history, streaks and animation timing have no path into
+/// alone - bankroll, history, streaks and animation timing have no path into
 /// any result. Plus bankroll modes, safeguards, records and achievements.
 final class CasinoFairnessTests: XCTestCase {
 

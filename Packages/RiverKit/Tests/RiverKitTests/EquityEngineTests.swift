@@ -87,7 +87,7 @@ final class EquityEngineTests: XCTestCase {
 
     func testDeadCardRemovalAffectsEquity() {
         // Villain range is exactly AA; hero holding two aces blocks it down
-        // to one combo — equity must be far better than versus full AA.
+        // to one combo - equity must be far better than versus full AA.
         let blocked = EquityEngine.equity(
             hole: [c(.ace, .spades), c(.ace, .hearts)],
             board: [],

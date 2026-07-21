@@ -524,7 +524,7 @@ public final class PokerHand {
 
     /// Everyone else folded: the last live seat wins everything without
     /// showdown. Every other claim was abandoned, so the winner takes ALL
-    /// committed chips — even chips above their own all-in level (this can
+    /// committed chips - even chips above their own all-in level (this can
     /// happen when deeper players open-fold after calling). The only money
     /// that comes back as a refund is the winner's own uncalled excess, which
     /// exists only when the winner out-committed every other seat.

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Deterministic offline daily challenge (§37): seeded by calendar date and
-/// content version — same day, same challenge, no server, no streak pressure.
+/// content version - same day, same challenge, no server, no streak pressure.
 public struct DailyChallenge: Sendable {
     public let dateKey: String
     public let seed: UInt64

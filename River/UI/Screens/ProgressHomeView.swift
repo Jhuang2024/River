@@ -3,7 +3,7 @@ import RiverKit
 
 /// Progress tab (§26): skill rating with honest confidence, per-street
 /// breakdown, detected leaks, the Stakes Ladder, achievements and lifetime
-/// statistics — all computed from real recorded hands.
+/// statistics - all computed from real recorded hands.
 struct ProgressHomeView: View {
     @EnvironmentObject var game: GameViewModel
     @EnvironmentObject var training: TrainingStore
@@ -145,7 +145,7 @@ struct ProgressHomeView: View {
         switch confidence {
         case .high: return "High confidence"
         case .moderate: return "Moderate confidence"
-        case .low: return "Low confidence — small sample"
+        case .low: return "Low confidence: small sample"
         }
     }
 
@@ -164,7 +164,7 @@ struct ProgressHomeView: View {
             Text("LEAKS").sectionHeader()
             if leaks.isEmpty {
                 Text(computed
-                     ? "No statistically supported leaks right now. Keep playing — detection needs volume."
+                     ? "No statistically supported leaks right now. Keep playing: detection needs volume."
                      : "Analyzing your hands…")
                     .font(Theme.Fonts.caption)
                     .foregroundStyle(Theme.textSecondary)
@@ -294,8 +294,8 @@ struct ProgressHomeView: View {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: Theme.Spacing.m) {
                     statCell("Hands", "\(lifetime.handsPlayed)")
                     statCell("Net chips", lifetime.netChips >= 0 ? "+\(lifetime.netChips)" : "\(lifetime.netChips)")
-                    statCell("VPIP", String(format: "%.0f%%", lifetime.vpipPercent))
-                    statCell("PFR", String(format: "%.0f%%", lifetime.pfrPercent))
+                    statCell("Pots entered", String(format: "%.0f%%", lifetime.vpipPercent))
+                    statCell("Raised first", String(format: "%.0f%%", lifetime.pfrPercent))
                     statCell("Showdowns won", "\(lifetime.showdownsWon)/\(lifetime.showdownsSeen)")
                     statCell("Biggest pot", "\(lifetime.biggestPotWon)")
                 }

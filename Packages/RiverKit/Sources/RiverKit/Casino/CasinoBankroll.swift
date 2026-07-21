@@ -34,7 +34,7 @@ public enum CasinoGameKind: String, Codable, Hashable, Sendable, CaseIterable, I
     }
 
     /// Whether skill affects results (§8). Roulette and Plinko outcomes
-    /// cannot be improved through prediction — stated, not implied.
+    /// cannot be improved through prediction - stated, not implied.
     public var isSkillGame: Bool {
         return self == .blackjack
     }
@@ -60,7 +60,7 @@ public enum BankrollMode: String, Codable, Hashable, Sendable, CaseIterable, Ide
         switch self {
         case .practice: return "Unlimited chips, no permanent losses. Statistics still count."
         case .session: return "A fixed stake for one sitting; resets when the session ends."
-        case .career: return "One persistent fictional bankroll. Going broke offers a free rebuild — never a purchase."
+        case .career: return "One persistent fictional bankroll. Going broke offers a free rebuild: never a purchase."
         }
     }
 }
@@ -121,7 +121,7 @@ public struct CasinoBankrollState: Codable, Hashable, Sendable {
 
 /// Optional local session safeguards (§11): plain limits the player set for
 /// themselves. When one is reached the current round finishes safely and the
-/// summary appears — no moralizing, no silent overrides.
+/// summary appears - no moralizing, no silent overrides.
 public struct SessionSafeguards: Codable, Hashable, Sendable {
     /// Maximum rounds this sitting (nil = none).
     public var roundLimit: Int?

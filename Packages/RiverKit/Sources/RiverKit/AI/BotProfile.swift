@@ -22,7 +22,7 @@ public enum BotArchetype: String, Codable, CaseIterable, Sendable {
     }
 }
 
-/// Difficulty changes strategic quality only — never dealt cards (§10).
+/// Difficulty changes strategic quality only - never dealt cards (§10).
 public enum BotDifficulty: String, Codable, CaseIterable, Sendable {
     case beginner
     case intermediate
@@ -128,7 +128,7 @@ public struct BotProfile: Codable, Hashable, Sendable, Identifiable {
             callStickiness: 0.85,
             sizingJitter: 0.25,
             positionAwareness: difficulty == .beginner ? 0.1 : 0.35,
-            note: "Hates folding. Don't bluff — value bet relentlessly."
+            note: "Hates folding. Don't bluff: value bet relentlessly."
         )
     }
 

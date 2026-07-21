@@ -100,7 +100,7 @@ final class FairnessTests: XCTestCase {
         }
     }
 
-    /// The dealt cards depend only on the seed — never on AI difficulty.
+    /// The dealt cards depend only on the seed - never on AI difficulty.
     func testDeckDistributionIndependentOfDifficulty() {
         let config = HandConfig(stacks: sixStacks(), buttonIndex: 0, smallBlind: 1, bigBlind: 2, seed: 4242)
         let reference = PokerHand(config: config)

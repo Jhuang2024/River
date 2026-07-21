@@ -196,7 +196,7 @@ enum DecisionTimerSetting: String, Codable, CaseIterable, Identifiable {
     }
 }
 
-/// Hero stack display mode (§8) — cycled by tapping the stack.
+/// Hero stack display mode (§8) - cycled by tapping the stack.
 enum StackDisplayMode: String, Codable, CaseIterable {
     case chips
     case bigBlinds
@@ -384,7 +384,7 @@ struct AppSettings: Codable, Equatable {
     /// Reads one field, keeping the default when the key is absent or invalid.
     private static func field<T: Decodable>(_ container: KeyedDecodingContainer<CodingKeys>, _ key: CodingKeys, _ fallback: T) -> T {
         // try? flattens the nested optional: nil here means the key was
-        // absent OR held an invalid value — either way, keep the default.
+        // absent OR held an invalid value - either way, keep the default.
         if let value = try? container.decodeIfPresent(T.self, forKey: key) {
             return value
         }

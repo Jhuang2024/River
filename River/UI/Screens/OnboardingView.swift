@@ -37,7 +37,7 @@ struct OnboardingView: View {
                             .font(.system(size: 32, weight: .black, design: .rounded))
                             .kerning(8)
                             .foregroundStyle(Theme.textPrimary)
-                        Text("Three quick questions — no account, nothing leaves your phone.")
+                        Text("Three quick questions: no account, nothing leaves your phone.")
                             .font(Theme.Fonts.body)
                             .foregroundStyle(Theme.textSecondary)
                     }

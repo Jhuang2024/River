@@ -13,7 +13,7 @@ struct DrillActivity: Identifiable {
 }
 
 /// One question at a time, graded instantly with the real analyzer's labels
-/// and explanations (§14). No lives, no timers — just honest feedback.
+/// and explanations (§14). No lives, no timers - just honest feedback.
 struct DrillSessionView: View {
     let activity: DrillActivity
     @EnvironmentObject var training: TrainingStore

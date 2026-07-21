@@ -1,7 +1,7 @@
 import XCTest
 @testable import RiverKit
 
-/// Curriculum content integrity (§18, §63) and drill generation (§16–17).
+/// Curriculum content integrity (§18, §63) and drill generation (§16-17).
 final class CurriculumTests: XCTestCase {
 
     func testShippedCurriculumPassesValidation() {

@@ -247,7 +247,7 @@ public enum PotMath {
     /// - Parameters:
     ///   - amountToCall: chips the caller must add.
     ///   - potBeforeCall: every chip already committed by everyone (including
-    ///     the caller's own previous commitments — they are in the pot).
+    ///     the caller's own previous commitments - they are in the pot).
     public static func odds(amountToCall: Int, potBeforeCall: Int) -> PotOdds {
         let call = max(0, amountToCall)
         let pot = max(0, potBeforeCall)
@@ -260,7 +260,7 @@ public enum PotMath {
         )
     }
 
-    /// EV of calling in chips: equity × finalPot − call (§19). Approximate —
+    /// EV of calling in chips: equity × finalPot − call (§19). Approximate -
     /// ignores future betting.
     public static func callEV(equity: Double, amountToCall: Int, potBeforeCall: Int) -> Double {
         let odds = odds(amountToCall: amountToCall, potBeforeCall: potBeforeCall)

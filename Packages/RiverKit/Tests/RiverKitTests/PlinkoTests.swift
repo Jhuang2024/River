@@ -55,7 +55,7 @@ final class PlinkoTests: XCTestCase {
     }
 
     func testPayoutUsesExactIntegerArithmetic() {
-        // 0.5x on 25 chips floors to 12 — deterministic, documented flooring.
+        // 0.5x on 25 chips floors to 12 - deterministic, documented flooring.
         let table = PlinkoTables.multipliers(rows: .eight, risk: .low)
         XCTAssertEqual(table[4], 50)
         var found = false

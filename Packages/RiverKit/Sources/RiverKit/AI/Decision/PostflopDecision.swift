@@ -135,7 +135,7 @@ public struct PostflopContext: Sendable {
     }
 }
 
-/// Candidate generation and interpretable scoring (§20–§25).
+/// Candidate generation and interpretable scoring (§20-§25).
 public enum PostflopDecision {
 
     // MARK: - Candidate generation
@@ -268,7 +268,7 @@ public enum PostflopDecision {
         return Outcome(action: chosen.action, trace: trace)
     }
 
-    /// Interpretable per-candidate scoring (§19, §21–§25). EV units: chips.
+    /// Interpretable per-candidate scoring (§19, §21-§25). EV units: chips.
     /// `noiseScale` 0 gives the deterministic, personality-noise-free scores
     /// used by post-hand analysis.
     public static func score(

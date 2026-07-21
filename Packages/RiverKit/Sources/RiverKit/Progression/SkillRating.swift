@@ -1,6 +1,6 @@
 import Foundation
 
-/// Decision-quality rating (§26–27): computed from stored analyses, never
+/// Decision-quality rating (§26-27): computed from stored analyses, never
 /// from chips won. Confidence grows with sample; single hands barely move it.
 public struct RatingReport: Codable, Hashable, Sendable {
     public struct StreetRating: Codable, Hashable, Sendable {

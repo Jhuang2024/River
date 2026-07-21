@@ -80,7 +80,7 @@ public struct PreflopContext: Equatable, Sendable {
     }
 }
 
-/// Position- and stack-aware preflop decisions from configured ranges (§6–8).
+/// Position- and stack-aware preflop decisions from configured ranges (§6-8).
 public enum PreflopStrategy {
 
     public struct Decision: Sendable {

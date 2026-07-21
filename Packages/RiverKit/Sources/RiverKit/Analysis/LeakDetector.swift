@@ -28,7 +28,7 @@ public struct LeakReport: Identifiable, Sendable {
 
     public var summary: String {
         let direction = observed > definition.baselineHigh ? "above" : "below"
-        return "\(definition.title): \(Int(observed.rounded()))% over \(opportunities) opportunities — \(direction) the \(Int(definition.baselineLow.rounded()))–\(Int(definition.baselineHigh.rounded()))% reference band. Confidence: \(confidence.displayName)."
+        return "\(definition.title): \(Int(observed.rounded()))% over \(opportunities) opportunities: \(direction) the \(Int(definition.baselineLow.rounded()))-\(Int(definition.baselineHigh.rounded()))% reference band. Confidence: \(confidence.displayName)."
     }
 }
 
@@ -195,7 +195,7 @@ public enum LeakDetector {
     }
 
     /// Detected leaks, most severe first. Sub-sample definitions are omitted
-    /// entirely — no confident claims from ten hands (§29).
+    /// entirely - no confident claims from ten hands (§29).
     public static func detect(histories: [HandHistory]) -> [LeakReport] {
         let stats = stats(histories: histories)
         var reports: [LeakReport] = []

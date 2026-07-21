@@ -35,7 +35,7 @@ struct QuickCashSetupView: View {
                                 }
                             }
                         }
-                        Text(handsTarget == 0 ? "Play until you leave. Progress saves after every hand." : "About \(handsTarget / 2)–\(handsTarget) minutes.")
+                        Text(handsTarget == 0 ? "Play until you leave. Progress saves after every hand." : "About \(handsTarget / 2)-\(handsTarget) minutes.")
                             .font(.system(size: 12, design: .rounded))
                             .foregroundStyle(Theme.textSecondary)
                     }
@@ -108,7 +108,7 @@ struct QuickCashSetupView: View {
                         }
                     }
 
-                    Text("Blinds 1/2 · 200-chip stacks · fictional chips")
+                    Text("Forced starting bets (blinds) are 1 and 2 chips. Everyone starts with 200 fictional chips.")
                         .font(.system(size: 12, design: .rounded))
                         .foregroundStyle(Theme.textSecondary)
                         .frame(maxWidth: .infinity)

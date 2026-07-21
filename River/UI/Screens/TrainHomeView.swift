@@ -20,6 +20,7 @@ struct TrainHomeView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: Theme.Spacing.xl) {
                         recommendationCard
+                        glossaryCard
                         dailyCard
                         reviewCard
                         academyList
@@ -34,6 +35,11 @@ struct TrainHomeView: View {
             }
             .navigationDestination(for: Lesson.self) { lesson in
                 LessonView(lesson: lesson)
+            }
+            .navigationDestination(for: String.self) { destination in
+                if destination == "glossary" {
+                    GlossaryView()
+                }
             }
         }
         .tint(accent)
@@ -79,6 +85,32 @@ struct TrainHomeView: View {
         }
     }
 
+    /// Plain-words lookup for every term in the app.
+    private var glossaryCard: some View {
+        NavigationLink(value: "glossary") {
+            HStack(spacing: Theme.Spacing.m) {
+                Image(systemName: "book.closed")
+                    .font(.system(size: 17))
+                    .foregroundStyle(accent)
+                    .frame(width: 30)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Glossary")
+                        .font(Theme.Fonts.secondaryAction)
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("What's a pot? What does BTN mean? Every term, explained simply.")
+                        .font(Theme.Fonts.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(Theme.textTertiary)
+            }
+            .padding(Theme.Spacing.m)
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.card).fill(Theme.backgroundElevated))
+        }
+    }
+
     // MARK: - Daily challenge (§35)
 
     private var dailyCard: some View {
@@ -93,7 +125,7 @@ struct TrainHomeView: View {
                 }
             }
             if let result = training.todayResult {
-                Text("Done for today — \(Int((result * 100).rounded()))%. Same puzzles for everyone; new set at midnight.")
+                Text("Done for today: \(Int((result * 100).rounded()))%. Same puzzles for everyone; new set at midnight.")
                     .font(Theme.Fonts.caption)
                     .foregroundStyle(Theme.textSecondary)
             } else {
@@ -135,7 +167,7 @@ struct TrainHomeView: View {
         if !due.isEmpty {
             VStack(alignment: .leading, spacing: Theme.Spacing.s) {
                 Text("REVIEW DUE").sectionHeader()
-                Text("\(due.count) concept\(due.count == 1 ? "" : "s") fading — a short mixed drill keeps them sharp.")
+                Text("\(due.count) concept\(due.count == 1 ? "" : "s") fading: a short mixed drill keeps them sharp.")
                     .font(Theme.Fonts.caption)
                     .foregroundStyle(Theme.textSecondary)
                 ActionButton(title: "Review now", role: .secondary, accent: accent, identifier: "train.review") {
