@@ -1,6 +1,6 @@
 # RIVER
 
-A serious, offline No-Limit Texas Hold'em simulator and training system for iPhone,
+A serious, offline No-Limit Texas Hold'em simulator and training system for iPad,
 disguised as a fast, tense mobile game. Fictional chips only: nothing to buy,
 no ads, no accounts, no network.
 
@@ -22,6 +22,18 @@ no ads, no accounts, no network.
 - Session results with chip graph and basic stats (VPIP, PFR, showdowns)
 - Deterministic seeded shuffling: inspect any hand's deck seed after the fact
 - Synthesized sound, haptics, four-color deck option, speed controls
+
+## Beginner mode
+
+The app assumes no poker knowledge. Brand-new players (or anyone who flips
+the toggle in Profile or the in-game pause menu) get Beginner mode: full
+position names at the table (Dealer, Small blind, Early seat) instead of
+abbreviations, plain-words subtitles on every action button (Fold "Give up
+hand", Check "Stay in for free", Call "Match their bet"), and a running
+one-line narration under the table describing exactly what is happening in
+the current hand. A searchable glossary defines every term in the app in
+ordinary words and is reachable from Play, Train, Profile, the Casino Floor
+and mid-hand from the pause menu.
 
 ## Interface
 
@@ -202,8 +214,9 @@ Packages/RiverKit/      Pure-Swift engine package (no UI dependencies)
 
 ## Building
 
-Open `River.xcodeproj` in Xcode 16+ and run the `River` scheme on an iPhone or
-iPhone simulator (iOS 17+, portrait only).
+Open `River.xcodeproj` in Xcode 16+ and run the `River` scheme on an iPad or
+iPad simulator (iOS 17+, all orientations). Content lays out in a centred
+reading column so screens stay comfortable at iPad widths.
 
 ## Testing
 

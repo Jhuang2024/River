@@ -27,6 +27,7 @@ struct PlayHomeView: View {
                     }
                     .padding(Theme.Spacing.xl)
                 }
+                .readableColumn()
             }
             .navigationDestination(for: Route.self) { route in
                 switch route {

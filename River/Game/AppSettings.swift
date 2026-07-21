@@ -316,6 +316,10 @@ struct AppSettings: Codable, Equatable {
     var assistanceLevel: AssistanceLevel = .hints
     // Individual assistance toggles (presets set sensible defaults, each can
     // be flipped independently afterwards).
+    /// Beginner mode: every screen explains itself in plain words and the
+    /// table uses full names instead of abbreviations. Set from onboarding
+    /// for brand-new players; can be toggled any time.
+    var beginnerMode: Bool = false
     var showHandStrength: Bool = true
     var showPotOdds: Bool = true
     var showRequiredEquity: Bool = false
@@ -373,6 +377,7 @@ struct AppSettings: Codable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case speed, soundEnabled, hapticsEnabled, deckStyle, accent, assistanceLevel
+        case beginnerMode
         case showHandStrength, showPotOdds, showRequiredEquity, showBoardTexture
         case allowRecommendations, revealFoldedBotCards
         case confirmAllIn, protectStrongHands, swipeDownToFold, autoDeal, decisionTimer
@@ -399,6 +404,7 @@ struct AppSettings: Codable, Equatable {
         deckStyle = AppSettings.field(c, .deckStyle, .classic)
         accent = AppSettings.field(c, .accent, .amber)
         assistanceLevel = AppSettings.field(c, .assistanceLevel, .hints)
+        beginnerMode = AppSettings.field(c, .beginnerMode, false)
         showHandStrength = AppSettings.field(c, .showHandStrength, true)
         showPotOdds = AppSettings.field(c, .showPotOdds, true)
         showRequiredEquity = AppSettings.field(c, .showRequiredEquity, false)

@@ -122,6 +122,10 @@ struct ProfileView: View {
                 }
 
                 Section("Help") {
+                    Toggle("Beginner mode", isOn: $settingsStore.settings.beginnerMode)
+                    Text("Explains everything in plain words: full position names at the table, what each button does, and a running description of the current hand.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                     NavigationLink {
                         GlossaryView()
                     } label: {

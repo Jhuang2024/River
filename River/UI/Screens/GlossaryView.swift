@@ -163,6 +163,7 @@ struct GlossaryView: View {
                 }
                 .padding(Theme.Spacing.l)
             }
+            .readableColumn()
         }
         .searchable(text: $searchText, prompt: "Search any term")
         .navigationTitle("Glossary")

@@ -28,6 +28,7 @@ struct HandReplayView: View {
                 }
                 .padding(16)
             }
+            .readableColumn()
         }
         .navigationTitle("Hand #\(history.handNumber)")
         .navigationBarTitleDisplayMode(.inline)

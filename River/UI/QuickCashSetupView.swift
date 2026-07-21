@@ -119,6 +119,7 @@ struct QuickCashSetupView: View {
                 }
                 .padding(20)
             }
+            .readableColumn()
         }
         .navigationTitle("New session")
         .navigationBarTitleDisplayMode(.inline)

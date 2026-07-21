@@ -254,6 +254,7 @@ struct RouletteView: View {
                 }
                 .padding(Theme.Spacing.l)
             }
+            .readableColumn()
         }
         .navigationTitle("Roulette")
         .navigationBarTitleDisplayMode(.inline)

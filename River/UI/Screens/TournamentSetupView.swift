@@ -85,6 +85,7 @@ struct TournamentSetupView: View {
                 }
                 .padding(Theme.Spacing.xl)
             }
+            .readableColumn()
         }
         .navigationTitle("Sit & Go")
         .navigationBarTitleDisplayMode(.inline)

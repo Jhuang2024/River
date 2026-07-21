@@ -7,6 +7,8 @@ struct ActionBar: View {
     let actions: AvailableActions
     var accent: Color
     var leftHanded: Bool
+    /// Beginner mode: every button explains itself in plain words.
+    var beginnerMode: Bool = false
     /// Fold requests route through the caller so Protect Strong Hands can
     /// intercept them; the bar itself never applies actions.
     let onFold: () -> Void
@@ -32,17 +34,21 @@ struct ActionBar: View {
 
     @ViewBuilder
     private var foldButton: some View {
-        ActionButton(title: "Fold", role: .destructive, accent: accent, identifier: "action.fold", action: onFold)
+        ActionButton(title: "Fold",
+                     subtitle: beginnerMode ? "Give up hand" : nil,
+                     role: .destructive, accent: accent, identifier: "action.fold", action: onFold)
     }
 
     @ViewBuilder
     private var passive: some View {
         if actions.canCheck {
-            ActionButton(title: "Check", role: .secondary, accent: accent, identifier: "action.check", action: onCheck)
+            ActionButton(title: "Check",
+                         subtitle: beginnerMode ? "Stay in for free" : nil,
+                         role: .secondary, accent: accent, identifier: "action.check", action: onCheck)
         } else if actions.canCall {
             ActionButton(
                 title: "Call \(actions.callCost)",
-                subtitle: actions.isCallAllIn ? "All-in" : nil,
+                subtitle: actions.isCallAllIn ? "All-in" : (beginnerMode ? "Match their bet" : nil),
                 role: .secondary,
                 accent: accent,
                 identifier: "action.call",
@@ -56,6 +62,7 @@ struct ActionBar: View {
         if let options = actions.betRaise {
             ActionButton(
                 title: options.kind == .bet ? "Bet" : "Raise",
+                subtitle: beginnerMode ? (options.kind == .bet ? "Put chips in" : "Bet even more") : nil,
                 role: .primary,
                 accent: accent,
                 identifier: "action.betraise",

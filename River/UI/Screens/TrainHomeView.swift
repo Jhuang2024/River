@@ -28,6 +28,7 @@ struct TrainHomeView: View {
                     }
                     .padding(Theme.Spacing.xl)
                 }
+                .readableColumn()
             }
             .navigationTitle("Train")
             .navigationDestination(for: AcademyID.self) { academy in
@@ -299,6 +300,7 @@ struct AcademyView: View {
                 }
                 .padding(Theme.Spacing.xl)
             }
+            .readableColumn()
         }
         .navigationTitle(academy.title)
         .navigationBarTitleDisplayMode(.inline)

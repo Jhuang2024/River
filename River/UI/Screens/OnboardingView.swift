@@ -108,6 +108,8 @@ struct OnboardingView: View {
             settings.applyAssistancePreset(.guided)
             settings.preferredDifficulty = .beginner
             settings.preferredHandsTarget = 10
+            // Absolute beginners get plain-words explanations everywhere.
+            settings.beginnerMode = true
         } else {
             settings.applyAssistancePreset(help)
             settings.preferredDifficulty = experience == .regularly ? .intermediate : .beginner

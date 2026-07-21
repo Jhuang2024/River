@@ -237,6 +237,7 @@ struct BlackjackView: View {
                 }
                 .padding(Theme.Spacing.l)
             }
+            .readableColumn()
         }
         .navigationTitle("Blackjack")
         .navigationBarTitleDisplayMode(.inline)

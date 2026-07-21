@@ -731,18 +731,21 @@ final class GameViewModel: ObservableObject {
     // MARK: - Publishing (§46)
 
     private func positionName(offset: Int, count: Int) -> String {
+        // Beginner mode spells positions out in full words (§ terminology);
+        // experienced players get the standard abbreviations.
+        let beginner = settings.beginnerMode
         if count == 2 {
-            return offset == 0 ? "BTN" : "BB"
+            return offset == 0 ? (beginner ? "Dealer" : "BTN") : (beginner ? "Big blind" : "BB")
         }
         switch offset {
-        case 0: return "BTN"
-        case 1: return "SB"
-        case 2: return "BB"
+        case 0: return beginner ? "Dealer" : "BTN"
+        case 1: return beginner ? "Small blind" : "SB"
+        case 2: return beginner ? "Big blind" : "BB"
         default:
             let fromButton = count - offset
-            if fromButton == 1 { return "CO" }
-            if fromButton == 2 && count >= 5 { return "HJ" }
-            return "UTG"
+            if fromButton == 1 { return beginner ? "Late seat" : "CO" }
+            if fromButton == 2 && count >= 5 { return beginner ? "Middle seat" : "HJ" }
+            return beginner ? "Early seat" : "UTG"
         }
     }
 

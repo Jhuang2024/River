@@ -159,6 +159,14 @@ enum Theme {
 // MARK: - Shared control styling
 
 extension View {
+    /// iPad-friendly reading column: content stops stretching past a
+    /// comfortable width and centres itself on wide screens.
+    func readableColumn(maxWidth: CGFloat = 700) -> some View {
+        self
+            .frame(maxWidth: maxWidth)
+            .frame(maxWidth: .infinity)
+    }
+
     /// Standard prominent action button fill.
     func riverButton(prominent: Bool = true, accent: Color) -> some View {
         self

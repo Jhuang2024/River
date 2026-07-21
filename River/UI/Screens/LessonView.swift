@@ -34,6 +34,7 @@ struct LessonView: View {
                 }
                 .padding(Theme.Spacing.xl)
             }
+            .readableColumn()
         }
         .navigationTitle(lesson.title)
         .navigationBarTitleDisplayMode(.inline)

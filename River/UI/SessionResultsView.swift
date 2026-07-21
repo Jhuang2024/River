@@ -37,6 +37,7 @@ struct SessionResultsView: View {
                 }
                 .padding(20)
             }
+            .readableColumn()
         }
         .navigationTitle(game.mode == .tournament ? "Tournament result" : "Session results")
         .navigationBarTitleDisplayMode(.inline)

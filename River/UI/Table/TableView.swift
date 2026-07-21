@@ -58,8 +58,14 @@ struct TableView: View {
                 GeometryReader { proxy in
                     tableRegion(size: proxy.size)
                 }
+                if settingsStore.settings.beginnerMode {
+                    beginnerHelperStrip
+                }
                 heroRegion
             }
+            // iPad: keep the table a comfortable playing-card shape instead
+            // of stretching across the whole screen.
+            .readableColumn(maxWidth: 760)
         }
         .statusBarHidden(false)
         .sheet(isPresented: $showMenu) { menuSheet }
@@ -311,6 +317,49 @@ struct TableView: View {
         .accessibilityIdentifier("hero.stack")
     }
 
+    // MARK: - Beginner helper (plain-words narration of the table state)
+
+    /// One calm sentence explaining exactly what is happening right now,
+    /// assuming no poker knowledge at all.
+    private var beginnerHelperText: String {
+        guard let table = game.table else { return "" }
+        if table.isHandComplete {
+            return "The hand is over. The winner took the pot (the pile of chips in the middle)."
+        }
+        let streetText: String
+        switch table.street {
+        case .preflop: streetText = "You have 2 private cards. No shared cards yet."
+        case .flop: streetText = "The first 3 shared cards are out. Everyone combines them with their own 2 cards."
+        case .turn: streetText = "The 4th shared card is out."
+        case .river: streetText = "The 5th and final shared card is out."
+        }
+        if let actions = game.heroActions {
+            if actions.canCheck {
+                return streetText + " Your turn: nobody has bet, so you can check (stay in for free) or bet."
+            }
+            if actions.callCost > 0 {
+                return streetText + " Your turn: someone bet. Pay \(actions.callCost) to stay in, raise, or fold and lose nothing more."
+            }
+            return streetText + " Your turn."
+        }
+        if let acting = table.seats.first(where: { $0.isActing }) {
+            return streetText + " Waiting for \(acting.name) to act. The pot holds \(table.pot) chips."
+        }
+        return streetText
+    }
+
+    private var beginnerHelperStrip: some View {
+        Text(beginnerHelperText)
+            .font(Theme.Fonts.caption)
+            .foregroundStyle(Theme.textSecondary)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, Theme.Spacing.l)
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity)
+            .background(Theme.backgroundElevated.opacity(0.5))
+    }
+
     // MARK: - Hero region (bottom)
 
     private var heroRegion: some View {
@@ -416,6 +465,7 @@ struct TableView: View {
                 actions: actions,
                 accent: accent,
                 leftHanded: settingsStore.settings.leftHandedMode,
+                beginnerMode: settingsStore.settings.beginnerMode,
                 onFold: { requestFold() },
                 onCheck: { game.submitHeroAction(.check) },
                 onCall: {
@@ -527,6 +577,7 @@ struct TableView: View {
                     Toggle("Hints", isOn: $settingsStore.settings.allowRecommendations)
                 }
                 Section("Help") {
+                    Toggle("Beginner mode (explain everything)", isOn: $settingsStore.settings.beginnerMode)
                     NavigationLink {
                         GlossaryView()
                     } label: {

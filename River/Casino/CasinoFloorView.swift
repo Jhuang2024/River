@@ -29,6 +29,7 @@ struct CasinoFloorView: View {
                 }
                 .padding(Theme.Spacing.l)
             }
+            .readableColumn()
         }
         .navigationTitle("Casino Floor")
         .navigationBarTitleDisplayMode(.inline)
@@ -244,6 +245,7 @@ struct CasinoHistoryView: View {
                 }
                 .padding(Theme.Spacing.l)
             }
+            .readableColumn()
         }
         .navigationTitle("Casino history")
         .navigationBarTitleDisplayMode(.inline)
@@ -419,6 +421,7 @@ struct CountingTrainerView: View {
                 }
                 .padding(Theme.Spacing.l)
             }
+            .readableColumn()
         }
         .navigationTitle("Counting trainer")
         .navigationBarTitleDisplayMode(.inline)

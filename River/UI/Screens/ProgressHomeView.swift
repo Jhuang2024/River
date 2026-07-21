@@ -31,6 +31,7 @@ struct ProgressHomeView: View {
                     }
                     .padding(Theme.Spacing.xl)
                 }
+                .readableColumn()
             }
             .navigationTitle("Progress")
             .navigationDestination(for: Lesson.self) { lesson in

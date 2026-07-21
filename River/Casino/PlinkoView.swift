@@ -273,6 +273,7 @@ struct PlinkoView: View {
                 }
                 .padding(Theme.Spacing.l)
             }
+            .readableColumn()
         }
         .navigationTitle("Plinko")
         .navigationBarTitleDisplayMode(.inline)

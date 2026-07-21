@@ -85,6 +85,7 @@ struct DrillSessionView: View {
             }
             .padding(Theme.Spacing.xl)
         }
+        .readableColumn()
     }
 
     private func scenarioCard(_ scenario: DrillScenario) -> some View {

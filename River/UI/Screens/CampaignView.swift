@@ -27,6 +27,7 @@ struct CampaignView: View {
                 }
                 .padding(Theme.Spacing.xl)
             }
+            .readableColumn()
         }
         .navigationTitle("Stakes Ladder")
         .navigationBarTitleDisplayMode(.inline)
