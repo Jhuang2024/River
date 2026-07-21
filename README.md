@@ -73,6 +73,51 @@ six-max table, and a thumb-reach hero region.
 - **Adaptive recommendations**: confident statistical leaks first, then due
   reviews, then the next unlocked lesson.
 
+## Casino Floor
+
+Three additional offline modes live under Play → Casino Floor, sharing the
+design system, audio, haptics, statistics, achievements, save system and
+deterministic RNG — never the poker engine itself. Fictional chips only: no
+purchases, no ads, no timers, and a free bankroll rebuild whenever a career
+bankroll hits zero.
+
+- **Blackjack** — complete rules engine (six-deck shoe, dealer stands on
+  soft 17, 3:2 blackjack with exact integer payouts via even bet steps,
+  double after split, resplit to four hands, split aces one card, dealer
+  peek, configurable H17/DAS/surrender/insurance/decks/penetration), an
+  explicit state machine, basic strategy derived from the SAME rule config
+  (Guided/Hint/Pure modes plus individual toggles), post-hand mistake
+  explanations, and a Hi-Lo counting trainer (card drills, true-count
+  conversion, full-shoe simulation). Counting displays are off by default and
+  the dealer never reacts to the count.
+- **Roulette** — European wheel by default, American optional with its
+  higher house edge stated plainly. All standard inside bets (straight,
+  split, street, corner, six line) validated against the real layout
+  adjacency, all outside bets, exact payouts (35/17/11/8/5/2/2/1 to 1),
+  undo/clear/repeat/double, previous-number strip with "each spin is
+  independent", and a wheel animation that lands on the seeded authoritative
+  pocket — never the other way round.
+- **Plinko** — original SpriteKit board (8/12/16 rows, Low/Medium/High
+  risk). Outcomes come from a seeded per-ball path model BEFORE animation;
+  the ball replays that exact path, so frame rate can never change a payout.
+  Multiplier tables are versioned configuration validated for symmetry and a
+  small constant house edge (EV 0.989–0.999). Single drops, 5/10-ball
+  batches, and auto-drop with profit/loss/bankroll stop conditions that
+  halts on backgrounding.
+- **Shared fairness** — every round records its seed and shows it afterwards
+  with the payout arithmetic; identical seeds and actions reproduce
+  identical results; bankroll, streaks and history are structurally unable
+  to influence outcomes (tested).
+- **Bankrolls** — Practice (unlimited, stats still tracked), Session (fixed
+  stake per sitting) and Career (persistent, free rebuild), shared across
+  games or independent per game. Optional session safeguards (round/loss/
+  profit limits) finish the current round safely and never interrupt
+  mid-hand.
+- **Floor summary** — cross-game stats keep strategy games (Poker,
+  Blackjack) separate from pure-chance games (Roulette, Plinko), with the
+  distinction stated in the UI. Twelve casino achievements reward variety
+  and skill, never losses or volume.
+
 ## Tournaments and progression
 
 - **Sit-and-Go tournaments**: six players, three structures (Standard, Turbo,
@@ -147,6 +192,7 @@ Packages/RiverKit/      Pure-Swift engine package (no UI dependencies)
     Analysis/           Advisor, grading, statistics, leak detection
     Curriculum/         Lessons, drill engine, daily challenge, spaced review
     Tournament/         Sit-and-Go state machine and exact ICM
+    Casino/             Blackjack, Roulette, Plinko engines + bankrolls
     Progression/        Stakes Ladder campaign, skill rating, achievements
     History/            Hand events, histories, replayer
     Session/            Cash session state
@@ -179,6 +225,11 @@ equity, bubble risk premiums), tournament eliminations/placings/payouts through
 real rigged hands, curriculum validation (acyclic prerequisites, quiz
 integrity, drill determinism), spaced-review scheduling, campaign completion
 rules, leak-detector silence without samples, and achievement evidence.
+Casino suites cover the blackjack shoe/totals/actions/settlement/strategy
+charts, roulette wheels/bet validation/payouts/overlaps/zeros, Plinko table
+validation/determinism/conservation/auto-drop stops, and shared fairness
+(seed-only outcomes, wager-independence, bankroll modes, safeguards,
+records, achievements).
 
 ## Design principles
 

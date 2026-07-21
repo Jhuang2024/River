@@ -6,6 +6,7 @@ import RiverKit
 struct PlayHomeView: View {
     @EnvironmentObject var game: GameViewModel
     @EnvironmentObject var settingsStore: SettingsStore
+    @EnvironmentObject var casino: CasinoStore
     @State private var path = NavigationPath()
 
     private var accent: Color { settingsStore.accent }
@@ -37,8 +38,25 @@ struct PlayHomeView: View {
                 }
             }
             .navigationDestination(for: String.self) { destination in
-                if destination == "campaign" {
+                switch destination {
+                case "campaign":
                     CampaignView()
+                case "casino":
+                    CasinoFloorView()
+                case CasinoGameKind.blackjack.rawValue:
+                    BlackjackView(casino: casino)
+                case CasinoGameKind.roulette.rawValue:
+                    RouletteView(casino: casino)
+                case CasinoGameKind.plinko.rawValue:
+                    PlinkoView(casino: casino)
+                case "casino-history":
+                    CasinoHistoryView()
+                case "counting-trainer":
+                    CountingTrainerView()
+                case "casino-settings", "blackjack-settings", "roulette-settings", "plinko-settings":
+                    CasinoSettingsView()
+                default:
+                    EmptyView()
                 }
             }
         }
@@ -89,6 +107,9 @@ struct PlayHomeView: View {
             }
             ActionButton(title: "Stakes Ladder", role: .secondary, accent: accent, identifier: "play.campaign") {
                 path.append("campaign")
+            }
+            ActionButton(title: "Casino Floor", role: .quiet, accent: accent, identifier: "play.casino") {
+                path.append("casino")
             }
             Text("Six-max no-limit hold'em against adaptive AI opponents.\nCash games, tournaments and a decision-graded campaign.")
                 .font(Theme.Fonts.caption)

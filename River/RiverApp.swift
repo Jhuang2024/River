@@ -26,6 +26,7 @@ struct RiverApp: App {
     @StateObject private var settingsStore: SettingsStore
     @StateObject private var game: GameViewModel
     @StateObject private var training: TrainingStore
+    @StateObject private var casino: CasinoStore
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -55,6 +56,7 @@ struct RiverApp: App {
         _settingsStore = StateObject(wrappedValue: settings)
         _game = StateObject(wrappedValue: gameModel)
         _training = StateObject(wrappedValue: TrainingStore(store: store))
+        _casino = StateObject(wrappedValue: CasinoStore(store: store))
     }
 
     var body: some Scene {
@@ -63,6 +65,7 @@ struct RiverApp: App {
                 .environmentObject(settingsStore)
                 .environmentObject(game)
                 .environmentObject(training)
+                .environmentObject(casino)
                 .preferredColorScheme(.dark)
                 .onChange(of: settingsStore.settings.soundEnabled) { _, enabled in
                     game.sounds.enabled = enabled
