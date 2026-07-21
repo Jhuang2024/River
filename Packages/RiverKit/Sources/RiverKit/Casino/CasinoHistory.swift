@@ -30,6 +30,16 @@ public struct CasinoRoundRecord: Codable, Hashable, Sendable, Identifiable {
             public let returned: Int
             /// Actions that deviated from basic strategy, with what it said.
             public let strategyMistakes: [String]
+
+            public init(cards: [BlackjackCard], actions: [BlackjackAction], outcome: BlackjackHandOutcome,
+                        bet: Int, returned: Int, strategyMistakes: [String]) {
+                self.cards = cards
+                self.actions = actions
+                self.outcome = outcome
+                self.bet = bet
+                self.returned = returned
+                self.strategyMistakes = strategyMistakes
+            }
         }
         public let hands: [HandRecord]
         public let dealerCards: [BlackjackCard]
