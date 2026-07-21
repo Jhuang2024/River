@@ -61,7 +61,7 @@ public enum BotDifficulty: String, Codable, CaseIterable, Sendable {
 
 /// Tunable personality for one AI opponent. Parameters shift frequencies and
 /// thresholds; they never override legal play.
-public struct BotProfile: Codable, Equatable, Sendable, Identifiable {
+public struct BotProfile: Codable, Hashable, Sendable, Identifiable {
     public var id: UUID
     public var name: String
     /// SF Symbol name used as the avatar.
